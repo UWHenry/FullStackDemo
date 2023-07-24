@@ -17,3 +17,17 @@ class User(db.Model):
     
     def get_id(self):
         return str(self.username)
+    
+    def as_dict(self):
+        return {
+            "username": str(self.username),
+            "address": self.address,
+            "roles": [
+                {
+                    "rolename": role.rolename,
+                    "permission": role.permission,
+                    "description": role.description
+                }
+                for role in self.roles
+            ]
+        }
