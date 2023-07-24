@@ -1,18 +1,29 @@
 from models import db
 from models.user import User
+from models.role import Role
 from . import argon2
 from typing import Union, Literal
 
 class UserManager:
     @staticmethod
-    def create(username: str, password: str, address: str) -> User | None:
+    def _get_role_list(roles: list[str]):
+        role_list = []
+        for rolename in roles:
+            role = Role.query.get(rolename)
+            if role and role not in role_list:
+                role_list.append(role)
+        return role_list
+            
+    @staticmethod
+    def create(username: str, password: str, address: str, roles: list[str]) -> User | None:
         try:
             db.session.begin()
             password_hash = argon2.generate_password_hash(password)
             new_user = User(
                 username = username,
                 password = password_hash,
-                address = address
+                address = address,
+                roles = UserManager._get_role_list(roles)
             )
             db.session.add(new_user)
             db.session.commit()
@@ -27,7 +38,7 @@ class UserManager:
         return user
 
     @staticmethod
-    def update(username: str, password: str | None, address: str | None) -> Union[Literal["Success"], Literal["User not found"], Literal["Fail"]]:
+    def update(username: str, password: str | None, address: str | None, roles: list[str] | None) -> Union[Literal["Success"], Literal["User not found"], Literal["Fail"]]:
         try:
             db.session.begin()
             user = User.query.get(username)
@@ -35,8 +46,10 @@ class UserManager:
                 if password:
                     password_hash = argon2.generate_password_hash(password)
                     user.password = password_hash
-                if address:
+                if address is not None:
                     user.address = address
+                if roles is not None:
+                    user.roles = UserManager._get_role_list(roles)
                 db.session.commit()
                 return "Success"
             return "User not found"
@@ -62,9 +75,9 @@ class UserManager:
     def list(page: int = 1, page_size: int = 10, order_by: str = "username", reverse: bool = False, search_username: str | None = None, search_address: str | None = None) -> list[User]:
         query = User.query
         if search_username:
-            query = query.filter(User.username.like(f'%{search_username}%'))
+            query = query.filter(User.username.ilike(f'%{search_username}%'))
         if search_address:
-            query = query.filter(User.address.like(f'%{search_address}%'))
+            query = query.filter(User.address.ilike(f'%{search_address}%'))
         
         order = User.username
         if order_by == "address":
