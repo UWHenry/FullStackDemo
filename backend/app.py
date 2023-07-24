@@ -34,13 +34,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 db.init_app(app) 
 with app.app_context():
     db.create_all()
-users = user_manager.UserManager
-
 
 api.add_namespace(user_ns)
 api.add_namespace(role_ns)
 api.add_namespace(csrf_ns)
-# api.add_namespace(db_testing_ns)
+api.add_namespace(db_testing_ns)
  
 
 # web sockets
