@@ -13,6 +13,7 @@ class User(db.Model):
     password = db.Column(db.String, nullable=False)
     address = db.Column(db.String, nullable=False)
     roles = db.relationship('Role', secondary=user_roles, backref=db.backref('users', lazy=True))
+    version_id = db.Column(db.Integer, nullable=False, default=0)
     
     def get_id(self):
         return str(self.username)
