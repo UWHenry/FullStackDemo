@@ -7,6 +7,7 @@ class UserManager:
     @staticmethod
     def create(username: str, password: str, address: str) -> bool:
         try:
+            db.session.begin()
             password_hash = argon2.generate_password_hash(password)
             new_user = User(
                 username = username,
@@ -17,7 +18,8 @@ class UserManager:
             db.session.commit()
             return True
         except:
-            return False
+            db.session.rollback()
+        return False
 
     @staticmethod
     def read(username: str) -> User | None:
@@ -26,24 +28,32 @@ class UserManager:
 
     @staticmethod
     def update(username: str, password: str | None, address: str | None) -> bool:
-        user = User.query.get(username)
-        if user:
-            if password:
-                password_hash = argon2.generate_password_hash(password)
-                user.password = password_hash
-            if address:
-                user.address = address
-            db.session.commit()
-            return True
+        try:
+            db.session.begin()
+            user = User.query.get(username)
+            if user:
+                if password:
+                    password_hash = argon2.generate_password_hash(password)
+                    user.password = password_hash
+                if address:
+                    user.address = address
+                db.session.commit()
+                return True
+        except:
+            db.session.rollback()
         return False
 
     @staticmethod
     def delete(username: str) -> bool:
-        user = User.query.get(username)
-        if user:
-            db.session.delete(user)
-            db.session.commit()
-            return True
+        try:
+            db.session.begin()
+            user = User.query.get(username)
+            if user:
+                db.session.delete(user)
+                db.session.commit()
+                return True
+        except:
+            db.session.rollback()
         return False
 
     @staticmethod
