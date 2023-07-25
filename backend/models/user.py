@@ -1,11 +1,12 @@
 from . import db
 
 
-# Association Table
+# Association Table for many-to-many relationship between user and role
 user_roles = db.Table('user_roles',
     db.Column('user_username', db.String, db.ForeignKey('users.username'), primary_key=True),
     db.Column('role_rolename', db.String, db.ForeignKey('roles.rolename'), primary_key=True)
 )
+
 
 class User(db.Model):
     __tablename__ = "users"
@@ -14,10 +15,10 @@ class User(db.Model):
     address = db.Column(db.String, nullable=False)
     roles = db.relationship('Role', secondary=user_roles, backref=db.backref('users', lazy=True))
     version_id = db.Column(db.Integer, nullable=False, default=0)
-    
+
     def get_id(self):
         return str(self.username)
-    
+
     def as_dict(self):
         return {
             "username": str(self.username),
