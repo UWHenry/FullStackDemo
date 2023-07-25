@@ -4,6 +4,7 @@ import time
 from flask import Flask, request
 from flask_restx import Api
 from flask_socketio import SocketIO, emit
+from flask_cors import CORS
 
 from resources.user_resource import ns as user_ns
 from resources.role_resource import ns as role_ns
@@ -14,14 +15,15 @@ from flask_jwt_extended import JWTManager
 from flask_wtf.csrf import CSRFProtect
 
 from models import db
-from db_utils import argon2, user_manager
+from db_utils import argon2
 
 
 app = Flask(__name__)
-api = Api(app)
+api = Api(app, version='1.0', title='My API', doc='/api/swagger.json')
 
-
-app.config['SECRET_KEY'] = 'uFTuxjpGQxU8EsfcVPcTJfzqwG1CrjWk'
+# app.config['SECRET_KEY'] = 'uFTuxjpGQxU8EsfcVPcTJfzqwG1CrjWk'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+CORS(app, origins=["http://localhost:3000"], supports_credentials=True, expose_headers=["X-CSRFToken"])
 csrf = CSRFProtect(app)
 jwt = JWTManager(app)
 argon2.init_app(app)

@@ -2,7 +2,7 @@ from db_utils import role_manager
 from flask import request
 from flask_restx  import Resource, fields
 from flask_jwt_extended import jwt_required
-from . import ns
+from . import ns, message_model
 
 # models for swagger
 user_model = ns.model("Role's Users Field", {
@@ -37,7 +37,7 @@ roles = role_manager.RoleManager
 class RoleResource(Resource):
     @ns.param('rolename', 'The rolename of the role to read', type='string', required=True)
     @ns.marshal_with(role_model, code=200)
-    @ns.marshal_with(None, code=404, description="Role not found")
+    @ns.marshal_with(message_model, code=404, description="Role not found")
     @jwt_required()
     def get(self, rolename: str):
         result_role = roles.read(rolename)
@@ -45,9 +45,9 @@ class RoleResource(Resource):
             return result_role.as_dict(), 200
         return {"message": "Role not found"}, 404
     
-    @ns.marshal_with(None, code=200, description="Success")
-    @ns.marshal_with(None, code=404, description="Role not found")
-    @ns.marshal_with(None, code=500, description="Fail")
+    @ns.marshal_with(message_model, code=200, description="Success")
+    @ns.marshal_with(message_model, code=404, description="Role not found")
+    @ns.marshal_with(message_model, code=500, description="Fail")
     @jwt_required()
     def delete(self, rolename: str):
         message = roles.delete(rolename)
@@ -61,9 +61,9 @@ class RoleResource(Resource):
 @ns.route('/role')
 class RoleUpdateResource(Resource):
     @ns.expect(role_input)
-    @ns.marshal_with(None, code=200, description="Success")
-    @ns.marshal_with(None, code=400, description="Invalid json body")
-    @ns.marshal_with(None, code=409, description="Role already Exists")
+    @ns.marshal_with(message_model, code=200, description="Success")
+    @ns.marshal_with(message_model, code=400, description="Invalid json body")
+    @ns.marshal_with(message_model, code=409, description="Role already Exists")
     @jwt_required()
     def post(self):
         data = request.get_json()
@@ -79,10 +79,10 @@ class RoleUpdateResource(Resource):
         
         
     @ns.expect(role_input)
-    @ns.marshal_with(None, code=200, description="Success")
-    @ns.marshal_with(None, code=400, description="Invalid json body")
-    @ns.marshal_with(None, code=404, description="Role not found")
-    @ns.marshal_with(None, code=500, description="Fail")
+    @ns.marshal_with(message_model, code=200, description="Success")
+    @ns.marshal_with(message_model, code=400, description="Invalid json body")
+    @ns.marshal_with(message_model, code=404, description="Role not found")
+    @ns.marshal_with(message_model, code=500, description="Fail")
     @jwt_required()
     def put(self):
         data = request.get_json()

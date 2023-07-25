@@ -2,7 +2,8 @@ from db_utils import user_manager, argon2
 from flask import request
 from flask_restx  import Resource, fields
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from . import ns
+from . import ns, message_model
+import sys
 
 # models for swagger
 role_model = ns.model("User's Roles Field", {
@@ -39,16 +40,20 @@ user_list_input = ns.model('User List Input', {
     "search_address": fields.String(required=False)
 })
 
+access_token_response = ns.model('Json Web Token', {
+    'access_token': fields.String(required=True)
+})
+
 users = user_manager.UserManager
 
 # sign up and login
 @ns.route('/signup')
 class SignUp(Resource):
     @ns.expect(user_signup_input)
-    @ns.marshal_with(None, code=200, description="Access token")
-    @ns.marshal_with(None, code=400, description="Invalid json body")
-    @ns.marshal_with(None, code=409, description="User already Exists")
-    def post(self, username: str, password: str, address: str):
+    @ns.marshal_with(access_token_response, code=200, description="Access token")
+    @ns.marshal_with(message_model, code=400, description="Invalid json body")
+    @ns.marshal_with(message_model, code=409, description="User already Exists")
+    def post(self):
         data = request.get_json()
         username = data.get("username", None)
         password = data.get("password", None)
@@ -59,15 +64,19 @@ class SignUp(Resource):
         new_user = users.create(username, password, address, roles)
         if new_user:
             access_token = create_access_token(identity=username)
-            return {"access_token": access_token}, 200
+            print("--------------------")
+            print(access_token, username)
+            print(type(access_token))
+            sys.stdout.flush()
+            return {'access_token': access_token}, 200
         return {"message": "User already exists"}, 409
 
 @ns.route('/login')
 class Login(Resource):
     @ns.expect(user_login_input)
-    @ns.marshal_with(None, code=200, description="Access token")
-    @ns.marshal_with(None, code=401, description="Invalid credentials")
-    def post(self, username: str, password: str):
+    @ns.marshal_with(message_model, code=200, description="Access token")
+    @ns.marshal_with(message_model, code=401, description="Invalid credentials")
+    def post(self):
         data = request.get_json()
         username = data.get("username", "")
         password = data.get("password", "")
@@ -82,7 +91,7 @@ class Login(Resource):
 @ns.route('/user')
 class UserResource(Resource):
     @ns.marshal_with(user_model, code=200)
-    @ns.marshal_with(None, code=404, description="User not found")
+    @ns.marshal_with(message_model, code=404, description="User not found")
     @jwt_required()
     def get(self):
         username = get_jwt_identity()
@@ -92,10 +101,10 @@ class UserResource(Resource):
         return {"message": "User not found"}, 404
     
     @ns.expect(user_update_input)
-    @ns.marshal_with(None, code=200, description="Success")
-    @ns.marshal_with(None, code=400, description="Password cannot be empty string")
-    @ns.marshal_with(None, code=404, description="User not found")
-    @ns.marshal_with(None, code=500, description="Fail")
+    @ns.marshal_with(message_model, code=200, description="Success")
+    @ns.marshal_with(message_model, code=400, description="Password cannot be empty string")
+    @ns.marshal_with(message_model, code=404, description="User not found")
+    @ns.marshal_with(message_model, code=500, description="Fail")
     @jwt_required()
     def put(self):
         data = request.get_json()
@@ -112,9 +121,9 @@ class UserResource(Resource):
             return {"message": "User not found"}, 404
         return {"message": "Fail"}, 500
     
-    @ns.marshal_with(None, code=200, description="Success")
-    @ns.marshal_with(None, code=404, description="User not found")
-    @ns.marshal_with(None, code=500, description="Fail")
+    @ns.marshal_with(message_model, code=200, description="Success")
+    @ns.marshal_with(message_model, code=404, description="User not found")
+    @ns.marshal_with(message_model, code=500, description="Fail")
     @jwt_required()
     def delete(self, username: str):
         username = get_jwt_identity()
