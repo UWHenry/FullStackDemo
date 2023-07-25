@@ -1,4 +1,4 @@
-from flask import session, jsonify
+from flask import session
 from flask_restx import Resource
 from flask_wtf.csrf import generate_csrf
 from namespace_models import api_ns, csrf_token_model
@@ -12,4 +12,4 @@ class CSRFTokenResource(Resource):
         if not csrf_token:
             csrf_token = generate_csrf()
             session['csrf_token'] = csrf_token
-        return jsonify({'csrf_token': csrf_token}), 200
+        return {'csrf_token': csrf_token}, 200

@@ -1,51 +1,40 @@
-from flask_restx  import Namespace, Resource
 import multiprocessing
-from models.role import Role
-from db_utils.role_manager import RoleManager
-import time
-import random
+from typing import Tuple
+
+from flask_restx import Resource
 from flask import Flask
+
+from db_utils.role_manager import RoleManager
+from namespace_models import db_testing_ns, optimistic_lock_result
 from models import db
-def test_update(index):
-    # Create a new Flask application for each process
+
+
+def test_optimistic_lock(rolename: str, index: int, version_id: int) -> Tuple[int, str]:
+    """
+    Initializes a new flask app, setup database connections, and update the database.
+    version_id is retrived prior to process creation to simulate resource competition.
+    """
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://my_user:my_password@localhost:5432/my_db"
-    
-
-    # Initialize the database with the app
+    # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
     db.init_app(app)
     with app.app_context():
-        testing_rolename = "optimistic_lock_test"
-        role = Role.query.get(testing_rolename)
-        role.description = f"new description {index}"
-        role.version_id += 1
-        time.sleep((10 - index) * 1)
-        try:
-            commit_time = time.time()
-            db.session.commit()
-            result = "Success"
-        except:
-            db.session.rollback()
-            result = "Fail"
-        # result = RoleManager.update(testing_rolename, None, f"new description {index}")
-        return (index, result, commit_time)
-
-
-db_testing_ns = Namespace("db_testing")
-testing_rolename = "optimistic_lock_test"
-# def test_update(index):
-#     result = RoleManager.update(testing_rolename, None, "new description")
-#     return (index, result)
+        role = RoleManager.update(rolename, version_id, None, f"new description: {index}")
+        result = "Success" if role else "Fail"
+        return {
+            "proccess_index": index,
+            "update_result": result
+        }
 
 @db_testing_ns.route('/test_optimistic_lock')
 class OptimisticLockTest(Resource):
+    @db_testing_ns.marshal_list_with(optimistic_lock_result)
     def get(self):
-        # initialize testing role
-        RoleManager.create(testing_rolename, "testing", "testing optimistic lock with 10 processes")
+        rolename = "optimistic_lock_test"
+        RoleManager.create(rolename, "testing", "testing optimistic lock with 10 processes")
+        role = RoleManager.read(rolename)
         
-        update_data = [i for i in range(10)]
-        # launch processes
+        testing_inputs = [(rolename, index, role.version_id) for index in range(10)]
         with multiprocessing.Pool(processes=10) as pool:
-            results = pool.map(test_update, update_data)
-        
+            results = pool.starmap(test_optimistic_lock, testing_inputs)
         return results, 200
