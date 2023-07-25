@@ -2,7 +2,7 @@ from db_utils.role_manager import RoleManager
 from flask import request
 from flask_restx import Resource
 from flask_jwt_extended import jwt_required
-from namespace_models import api_ns, message_output_model, role_model, role_input_model, role_search_input_model
+from .namespace_models import api_ns, message_output_model, role_model, role_input_model, role_search_input_model
 
 
 # Role Read and Delete

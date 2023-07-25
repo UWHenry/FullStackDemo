@@ -5,7 +5,7 @@ from flask_restx import Resource
 from flask import Flask
 
 from db_utils.role_manager import RoleManager
-from namespace_models import db_testing_ns, optimistic_lock_result
+from .namespace_models import db_testing_ns, optimistic_lock_result
 from models import db
 
 

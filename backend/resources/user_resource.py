@@ -2,7 +2,7 @@ from db_utils.user_manager import UserManager, argon2
 from flask import request
 from flask_restx import Resource
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from namespace_models import (
+from .namespace_models import (
     api_ns,
     message_output_model,
     access_token_model,
