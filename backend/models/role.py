@@ -1,4 +1,5 @@
 from . import db
+from .user_roles import user_roles
 
 
 class Role(db.Model):
@@ -6,7 +7,7 @@ class Role(db.Model):
     rolename = db.Column(db.String, primary_key=True, index=True)
     permission = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
-    users = db.relationship('User', secondary='user_roles', back_populates='roles')
+    users = db.relationship('User', secondary=user_roles, back_populates='roles')
     version_id = db.Column(db.Integer, nullable=False, default=0)
 
     def get_id(self):
