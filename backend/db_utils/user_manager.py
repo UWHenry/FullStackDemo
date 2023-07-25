@@ -1,9 +1,10 @@
 from models import db
 from models.user import User
 from models.role import Role
-from . import argon2
+from flask_argon2 import Argon2
 from typing import List
 
+argon2 = Argon2()
 
 class UserManager:
     @staticmethod
