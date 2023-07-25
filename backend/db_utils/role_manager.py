@@ -1,6 +1,7 @@
 from models import db
 from models.role import Role
-from typing import Union, Literal
+from typing import List
+
 
 class RoleManager:
     @staticmethod
@@ -8,9 +9,9 @@ class RoleManager:
         try:
             db.session.begin()
             new_role = Role(
-                rolename = rolename,
-                permission = permission,
-                description = description
+                rolename=rolename,
+                permission=permission,
+                description=description
             )
             db.session.add(new_role)
             db.session.commit()
@@ -25,46 +26,50 @@ class RoleManager:
         return role
 
     @staticmethod
-    def update(rolename: str, permission: str | None, description: str | None) -> Union[Literal["Success"], Literal["Role not found"], Literal["Fail"]]:
+    def update(rolename: str, version_id: int, permission: str | None, description: str | None) -> Role | None:
         try:
             db.session.begin()
             role = Role.query.get(rolename)
             if role:
+                if version_id < role.version_id:
+                    raise Exception(
+                        "Optimistic Lock Triggered: Abort Transaction!")
                 if permission is not None:
                     role.permission = permission
                 if description is not None:
                     role.description = description
+                role.version_id += 1
                 db.session.commit()
-                return "Success"
-            return "Role not found"
+                return role
         except:
             db.session.rollback()
-        return "Fail"
+        return None
 
     @staticmethod
-    def delete(rolename: str) -> Union[Literal["Success"], Literal["Role not found"], Literal["Fail"]]:
+    def delete(rolename: str) -> bool:
         try:
             db.session.begin()
             role = Role.query.get(rolename)
             if role:
                 db.session.delete(role)
                 db.session.commit()
-                return "Success"
-            return "Role not found"
+                return True
         except:
             db.session.rollback()
-        return "Fail"
+        return False
 
     @staticmethod
-    def list(page: int = 1, page_size: int = 10, order_by: str = "rolename", reverse: bool = False, search_rolename: str | None = None, search_permission: str | None = None, search_description: str | None = None) -> list[Role]:
+    def search(page: int = 1, page_size: int = 10, order_by: str = "rolename", reverse: bool = False, search_rolename: str | None = None, search_permission: str | None = None, search_description: str | None = None) -> List[Role]:
         query = Role.query
         if search_rolename:
             query = query.filter(Role.rolename.ilike(f'%{search_rolename}%'))
         if search_permission:
-            query = query.filter(Role.permission.ilike(f'%{search_permission}%'))
+            query = query.filter(
+                Role.permission.ilike(f'%{search_permission}%'))
         if search_description:
-            query = query.filter(Role.description.ilike(f'%{search_description}%'))
-        
+            query = query.filter(
+                Role.description.ilike(f'%{search_description}%'))
+
         order = Role.rolename
         if order_by == "permission":
             order = Role.permission
@@ -73,7 +78,11 @@ class RoleManager:
         if reverse:
             order = order.desc()
         query = query.order_by(order)
-            
+
         start_idx = (page - 1) * page_size
         roles_page = query.offset(start_idx).limit(page_size).all()
         return roles_page
+
+    @staticmethod
+    def list() -> List[Role]:
+        return Role.query.all()
