@@ -37,7 +37,9 @@ function UserListPage({ isLoggedIn }) {
         }
     };
     useEffect(() => {
-        fetchUsers();
+        if (isLoggedIn) {
+            fetchUsers();
+        }
     }, [currentPage, searchTerm, sortBy, sortReverse]);
 
     const handleSearch = (event) => {
@@ -68,15 +70,15 @@ function UserListPage({ isLoggedIn }) {
         }
     };
 
-    const handleUpdate = async () => {
-        navigate('/user/edit');
+    const handleUpdate = async (user) => {
+        navigate('/user/edit', { state: { user, isLoggedIn } });
     };
     return (
         <Container>
             <Row className="justify-content-center mt-5">
                 <Col xs={12} md={12}>
                     <h1 style={{ textAlign: 'center' }}>Users</h1>
-                    <Button variant="primary" type="button" className="mt-3">
+                    <Button variant="primary" type="button" className="mt-3" onClick={() => handleUpdate({})}>
                         Create User
                     </Button>
                     <FormControl type="text" value={searchTerm} onChange={handleSearch} placeholder="Search users" />
@@ -99,14 +101,10 @@ function UserListPage({ isLoggedIn }) {
                                     <td>{user.address}</td>
                                     <td>{user.roles.rolename}</td>
                                     <td>
-                                        <Button variant="primary" onClick={() => handleUpdate(user.username)}>
-                                            Update
-                                        </Button>
+                                        <Button variant="primary" onClick={() => handleUpdate(user)}>Update</Button>
                                     </td>
                                     <td>
-                                        <Button variant="danger" onClick={() => handleDelete(user.username)}>
-                                            Delete
-                                        </Button>
+                                        <Button variant="danger" onClick={() => handleDelete(user.username)}>Delete</Button>
                                     </td>
                                 </tr>
                             ))}

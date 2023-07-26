@@ -5,7 +5,7 @@ function NavigationMenu({ isLoggedIn }) {
     return (
         <Navbar bg="dark" data-bs-theme="dark">
             <Container>
-                <Navbar.Brand href="/home">Welcome</Navbar.Brand>
+                <Navbar.Brand>Welcome</Navbar.Brand>
                 <Nav className="me-auto">
                     <Link to="/user" className="nav-link">Users</Link>
                     {isLoggedIn ? <Link to="/logout" className="nav-link">Logout</Link> : null}

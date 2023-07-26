@@ -22,7 +22,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<Navigate to="/user" />} />
                 <Route path="/user" element={<UserListPage isLoggedIn={isLoggedIn} />} />
-                <Route path="/user/edit" element={<UserEditPage isLoggedIn={isLoggedIn} user={null}/>} />
+                <Route path="/user/edit" element={<UserEditPage />} />
                 <Route path="/signup" element={<SignupPage setIsLoggedIn={setIsLoggedIn} />} />
                 <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} />} />
                 <Route path="/logout" element={<LogoutPage setIsLoggedIn={setIsLoggedIn} />} />

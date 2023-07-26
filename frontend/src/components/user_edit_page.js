@@ -1,86 +1,83 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router';
-import { Container, Row, Col, Form, Button, Dropdown } from 'react-bootstrap';
-import axiosInstance from '../utils/axiosInstance';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Container, Row, Col, Form, Button, Dropdown } from "react-bootstrap";
+import axiosInstance from "../utils/axiosInstance";
 
-function UserEditPage({ isLoggedIn }) {
-    const navigate = useNavigate();
+function UserEditPage() {
+    const location = useLocation();
+    const { user = {}, isLoggedIn = false } = location.state ?? {};
+    const newUser = (Object.keys(user).length === 0);
     const [errorMessage, setErrorMessage] = useState("");
-    const [roles, setRoles] = useState({});
-    // const [selectedRoles, setSelectedRoles] = useState([]);
     const [formData, setFormData] = useState({
-        username: '',
-        password: '',
-        address: ''
+        username: user?.username ?? "",
+        password: "",
+        address: user?.address ?? "",
+        roles: user?.roles?.map((role) => role.rolename) ?? []
     });
 
+    //check login status
+    //redirects to login page if not logged in
+    //get list of roles if logged in 
+    const navigate = useNavigate();
+    const [roles, setRoles] = useState([]);
     useEffect(() => {
         if (!isLoggedIn) {
-            navigate('/login');
+            navigate("/login");
+        } else {
+            try {
+                axiosInstance.get(`/api/roles`)
+                    .then((response) => {
+                        setRoles(response.data);
+                    })
+                    .catch((error) => {
+                        console.error("Roles fetch failed:", error);
+                    });
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
         }
     }, [isLoggedIn, navigate]);
 
-    //get list of roles
-    useEffect(() => {
-        try {
-            axiosInstance.get(`/api/roles`)
-                .then((response) => {
-                    setRoles(response.data.reduce((acc, role) => {
-                        acc[role.rolename] = role;
-                        return acc;
-                    }, {}));
-                })
-                .catch((error) => {
-                    console.error('Roles fetch failed:', error);
-                });
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        }
-    }, []);
-
+    //update form on first two text fields
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
-    const handleRoleSelect = (role) => {
-        console.log(role.checked)
-        if (role.checked) {
-            role.checked = false;
+    //update form on dropdown checkbox
+    const handleRoleSelect = (e) => {
+        let rolename = e.target.getAttribute("role-id");
+        if (formData.roles.includes(rolename)) {
+            setFormData({ ...formData, roles: formData.roles.filter(role => role !== rolename)});
         } else {
-            role.checked = true;
+            setFormData({ ...formData, roles: [...formData.roles, rolename]});
         }
-        // if (selectedRoles.includes(rolename)) {
-        //     setSelectedRoles(selectedRoles.filter((role) => role !== rolename));
-        // } else {
-        //     setSelectedRoles([...selectedRoles, rolename]);
-        // }
-        // console.log(selectedRoles)
     };
-
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setErrorMessage("")
+        setErrorMessage("");
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        };
         try {
-            // const headers = {
-            //     'Accept': 'application/json',
-            //     'Content-Type': 'application/json',
-            // };
-            // axiosInstance.post('/api/signup', formData, { headers: headers })
-            //     .then((response) => {
-            //         sessionStorage.setItem("jwtToken", response.data.access_token);
-            //         navigate('/');
-            //     })
-            //     .catch((error) => {
-            //         let errMessage = error.response.data?.message;
-            //         if  (errMessage) {
-            //             setErrorMessage(errMessage)
-            //         }
-            //         console.error('POST request failed:', error);
-            //     });
+            const endpoint = newUser ? "/api/signup" : `/api/user/${formData.username}`;
+            const method = newUser ? "post" : "put";
+            const { address, roles } = formData;
+            const payload = newUser ? formData: {address, roles};
+            await axiosInstance[method](endpoint, payload, { headers });
         } catch (error) {
-            console.error('Error submitting form:', error);
+            let errMessage = error.response.data?.message;
+            if (errMessage) {
+                setErrorMessage(errMessage);
+            }
+            console.error(`${newUser ? "Create" : "Update"} User failed:`, error);
         }
+        navigate("/user");
     };
+    const handleCancel = (e) => {
+        navigate("/user");
+    }
 
     return (
         <Container>
@@ -90,49 +87,55 @@ function UserEditPage({ isLoggedIn }) {
                     <Form onSubmit={handleSubmit}>
                         <Form.Group controlId="username" className="mt-3">
                             <Form.Label>Username</Form.Label>
-                            <Form.Control type="text" placeholder="Enter your username" name="username"
-                                value={formData.username} onChange={handleChange} required />
+                            <Form.Control type="text" placeholder="Enter your username" name="username" value={formData.username} 
+                                onChange={handleChange} required disabled={!newUser}/>
+                        </Form.Group>
+
+                        <Form.Group controlId="username" className="mt-3">
+                            <Form.Label>Password</Form.Label>
+                            <Form.Control type="text" placeholder="Enter your password" name="password" value={formData.password} 
+                                onChange={handleChange} required disabled={!newUser}/>
                         </Form.Group>
 
                         <Form.Group controlId="address" className="mt-3">
                             <Form.Label>Address</Form.Label>
-                            <Form.Control type="textf" placeholder="Enter your address" name="address"
-                                value={formData.address} onChange={handleChange} />
+                            <Form.Control type="text" placeholder="Enter your address" name="address" value={formData.address} onChange={handleChange} />
                         </Form.Group>
 
                         <Form.Group controlId="roles" className="mt-3">
                             <Form.Label>Roles</Form.Label>
-                            <Dropdown>
-                                <Dropdown.Toggle variant="primary">
-                                    Select Roles
-                                </Dropdown.Toggle>
-
+                            <Dropdown autoClose={false}>
+                                <Dropdown.Toggle variant="primary">Select Roles</Dropdown.Toggle>
                                 <Dropdown.Menu>
-                                    {Object.keys(roles).map((role) => (
+                                    {roles.map((role) => (
                                         <Dropdown.Item key={role.rolename}>
                                             <Form.Check
                                                 type="checkbox"
                                                 label={`Name: ${role.rolename}, Permission: ${role.permission}`}
-                                                checked={role.checked}
-                                                onChange={() => handleRoleSelect(role)}
+                                                checked={formData.roles.includes(role.rolename)}
+                                                role-id={role.rolename}
+                                                onChange={handleRoleSelect}
+                                                key={JSON.stringify(formData)}
                                             />
                                         </Dropdown.Item>
                                     ))}
                                 </Dropdown.Menu>
                             </Dropdown>
                         </Form.Group>
-
-                        <Button variant="primary" type="submit" className="mt-3">
-                            Submit
-                        </Button>
-                        <div>
-                            <p className='mt-3'>{errorMessage}</p>
-                        </div>
+                        <Row className="mt-3">
+                            <Col className="d-flex justify-content-between">
+                                <Button variant="primary" type="submit" className="mt-3">Submit</Button>
+                                <Button variant="danger" type="button" className="mt-3" onClick={handleCancel}>Cancel</Button>
+                            </Col>
+                        </Row>
                     </Form>
+                    <div>
+                        <p className="mt-3">{errorMessage}</p>
+                    </div>
                 </Col>
             </Row>
         </Container>
     );
-};
+}
 
 export default UserEditPage;
