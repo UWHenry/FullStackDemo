@@ -38,15 +38,14 @@ class SignUp(Resource):
 @api_ns.route('/login')
 class Login(Resource):
     @api_ns.expect(user_login_input_model)
-    @api_ns.marshal_with(message_output_model, code=200, description="Access token")
-    @api_ns.marshal_with(message_output_model, code=401, description="Invalid credentials")
+    @api_ns.response(model=access_token_model, code=200, description="Access token")
+    @api_ns.response(model=message_output_model, code=401, description="Invalid credentials")
     def post(self):
         data = request.get_json()
         username = data.get("username", "")
         password = data.get("password", "")
-        password_hash = argon2.generate_password_hash(password)
         user = UserManager.read(username)
-        if user and user.password == password_hash:
+        if user and argon2.check_password_hash(user.password, password):
             access_token = create_access_token(identity=username)
             return {"access_token": access_token}, 200
         return {"message": "Invalid credentials"}, 401
