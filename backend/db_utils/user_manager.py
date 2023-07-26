@@ -19,19 +19,24 @@ class UserManager:
     @staticmethod
     def create(username: str, password: str, address: str, roles: List[str]) -> User | None:
         try:
-            with db.session.begin():
-                password_hash = argon2.generate_password_hash(password)
-                new_user = User(
-                    username=username,
-                    password=password_hash,
-                    address=address,
-                    roles=UserManager._get_role_list(roles)
-                )
-                db.session.add(new_user)
+            if not db.session.is_active:
+                db.session.begin()
+
+            password_hash = argon2.generate_password_hash(password)
+            new_user = User(
+                username=username,
+                password=password_hash,
+                address=address,
+                roles=UserManager._get_role_list(roles)
+            )
+            db.session.add(new_user)
+
+            if db.session.is_active:
                 db.session.commit()
-                return new_user
+            return new_user
         except:
-            db.session.rollback()
+            if db.session.is_active:
+                db.session.rollback()
         return None
 
     @staticmethod
@@ -42,37 +47,49 @@ class UserManager:
     @staticmethod
     def update(username: str, version_id: int, password: str | None, address: str | None, roles: List[str] | None) -> User | None:
         try:
-            with db.session.begin():
-                user = User.query.get(username)
-                if user:
-                    if version_id < user.version_id:
-                        raise Exception("Optimistic Lock Triggered: About Transaction!")
-                    if password:
-                        password_hash = argon2.generate_password_hash(password)
-                        user.password = password_hash
-                    if address is not None:
-                        user.address = address
-                    if roles is not None:
-                        user.roles = UserManager._get_role_list(roles)
-                    user.version_id += 1
+            if not db.session.is_active:
+                db.session.begin()
+
+            user = User.query.get(username)
+            if user:
+                if version_id < user.version_id:
+                    raise Exception("Optimistic Lock Triggered: About Transaction!")
+                if password:
+                    password_hash = argon2.generate_password_hash(password)
+                    user.password = password_hash
+                if address is not None:
+                    user.address = address
+                if roles is not None:
+                    user.roles = UserManager._get_role_list(roles)
+                user.version_id += 1
+
+                if db.session.is_active:
                     db.session.commit()
-                    return user
+                return user
         except Exception as e:
             print("update", e, flush=True)
-            db.session.rollback()
+            if db.session.is_active:
+                db.session.rollback()
+        if db.session.is_active:
+            db.session.commit()
         return None
 
     @staticmethod
     def delete(username: str) -> bool:
         try:
-            with db.session.begin():
-                user = User.query.get(username)
-                if user:
-                    db.session.delete(user)
+            if not db.session.is_active:
+                db.session.begin()
+
+            user = User.query.get(username)
+            if user:
+                db.session.delete(user)
+
+            if db.session.is_active:
                 db.session.commit()
-                return True
+            return True
         except:
-            db.session.rollback()
+            if db.session.is_active:
+                db.session.rollback()
         return False
         
     @staticmethod

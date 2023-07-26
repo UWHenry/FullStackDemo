@@ -7,17 +7,22 @@ class RoleManager:
     @staticmethod
     def create(rolename: str, permission: str, description: str) -> Role | None:
         try:
-            with db.session.begin():
-                new_role = Role(
-                    rolename=rolename,
-                    permission=permission,
-                    description=description
-                )
-                db.session.add(new_role)
+            if not db.session.is_active:
+                db.session.begin()
+
+            new_role = Role(
+                rolename=rolename,
+                permission=permission,
+                description=description
+            )
+            db.session.add(new_role)
+
+            if db.session.is_active:
                 db.session.commit()
-                return new_role
+            return new_role
         except:
-            db.session.rollback()
+            if db.session.is_active:
+                db.session.rollback()
         return None
 
     @staticmethod
@@ -28,34 +33,45 @@ class RoleManager:
     @staticmethod
     def update(rolename: str, version_id: int, permission: str | None, description: str | None) -> Role | None:
         try:
-            with db.session.begin():
-                role = Role.query.get(rolename)
-                if role:
-                    if version_id < role.version_id:
-                        raise Exception(
-                            "Optimistic Lock Triggered: Abort Transaction!")
-                    if permission is not None:
-                        role.permission = permission
-                    if description is not None:
-                        role.description = description
-                    role.version_id += 1
+            if not db.session.is_active:
+                db.session.begin()
+
+            role = Role.query.get(rolename)
+            if role:
+                if version_id < role.version_id:
+                    raise Exception(
+                        "Optimistic Lock Triggered: Abort Transaction!")
+                if permission is not None:
+                    role.permission = permission
+                if description is not None:
+                    role.description = description
+                role.version_id += 1
+
+                if db.session.is_active:
                     db.session.commit()
-                    return role
+                return role
         except:
-            db.session.rollback()
+            if db.session.is_active:
+                db.session.rollback()
+        if db.session.is_active:
+            db.session.commit()
         return None
 
     @staticmethod
     def delete(rolename: str) -> bool:
         try:
-            with db.session.begin():
-                role = Role.query.get(rolename)
-                if role:
-                    db.session.delete(role)
-                    db.session.commit()
-                    return True
+            if not db.session.is_active:
+                db.session.begin()
+            role = Role.query.get(rolename)
+            if role:
+                db.session.delete(role)
+
+            if db.session.is_active:
+                db.session.commit()
+            return True
         except:
-            db.session.rollback()
+            if db.session.is_active:
+                db.session.rollback()
         return False
 
     @staticmethod
@@ -86,7 +102,7 @@ class RoleManager:
     @staticmethod
     def list() -> List[Role]:
         return Role.query.all()
-    
+
     @staticmethod
     def count() -> int:
         return Role.query.count()
