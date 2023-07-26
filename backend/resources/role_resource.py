@@ -16,8 +16,6 @@ from .namespace_models import (
 @api_ns.route('/role/<string:rolename>')
 class RoleResource(Resource):
     @api_ns.param('rolename', 'The rolename of the role to read', type='string', required=True)
-    # @api_ns.marshal_with(role_model, code=200)
-    # @api_ns.marshal_with(message_output_model, code=404, description="Role not found")
     @api_ns.response(model=role_model, code=200, description="Role model")
     @api_ns.response(model=message_output_model, code=404, description="Role not found")
     @jwt_required()

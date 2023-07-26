@@ -54,6 +54,7 @@ class Login(Resource):
 # User Read, Update, Delete
 @api_ns.route('/user/<string:username>')
 class UserResource(Resource):
+    @api_ns.param('username', 'The username of the user to read', type='string', required=True)
     @api_ns.response(model=user_model, code=200, description="User model")
     @api_ns.response(model=message_output_model, code=404, description="User not found")
     @jwt_required()
@@ -63,6 +64,7 @@ class UserResource(Resource):
             return result_user.as_dict(), 200
         return {"message": "User not found"}, 404
 
+    @api_ns.param('username', 'The username of the user to update', type='string', required=True)
     @api_ns.expect(user_update_input_model)
     @api_ns.marshal_with(message_output_model, code=200, description="Success")
     @api_ns.marshal_with(message_output_model, code=400, description="Password cannot be empty string")
@@ -86,6 +88,7 @@ class UserResource(Resource):
             return {"message": "Success"}, 200
         return {"message": "Fail"}, 500
 
+    @api_ns.param('username', 'The username of the user to delete', type='string', required=True)
     @api_ns.marshal_with(message_output_model, code=200, description="Success")
     @api_ns.marshal_with(message_output_model, code=404, description="User not found")
     @api_ns.marshal_with(message_output_model, code=500, description="Fail")
