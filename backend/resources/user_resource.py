@@ -18,9 +18,9 @@ from .namespace_models import (
 @api_ns.route('/signup')
 class SignUp(Resource):
     @api_ns.expect(user_signup_input_model)
-    @api_ns.marshal_with(access_token_model, code=200, description="Access token")
-    @api_ns.marshal_with(message_output_model, code=400, description="Invalid json body")
-    @api_ns.marshal_with(message_output_model, code=409, description="User already Exists")
+    @api_ns.response(model=access_token_model, code=200, description="Access token")
+    @api_ns.response(model=message_output_model, code=400, description="Invalid json body")
+    @api_ns.response(model=message_output_model, code=409, description="User already Exists")
     def post(self):
         data = request.get_json()
         username = data.get("username", None)
@@ -54,8 +54,8 @@ class Login(Resource):
 # User Read, Update, Delete
 @api_ns.route('/user')
 class UserResource(Resource):
-    @api_ns.marshal_with(user_model, code=200)
-    @api_ns.marshal_with(message_output_model, code=404, description="User not found")
+    @api_ns.response(model=user_model, code=200, description="User model")
+    @api_ns.response(model=message_output_model, code=404, description="User not found")
     @jwt_required()
     def get(self):
         username = get_jwt_identity()
