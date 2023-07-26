@@ -92,18 +92,19 @@ class RoleSearchResource(Resource):
     @api_ns.marshal_with(role_search_output_model, code=200)
     @jwt_required()
     def post(self):
-        page = int(request.args.get('page', 1))
-        page_size = int(request.args.get('page_size', 10))
+        data = request.get_json()
+        page = data.get('page', 1)
+        page_size = data.get('page_size', 10)
         if page < 1:
             page = 1
         if page_size < 1:
             page_size = 10
 
-        sort_by = request.args.get('sort_by', 'rolename')
-        reverse = request.args.get('reverse', False)
-        search_rolename = request.args.get('search_rolename', None)
-        search_permission = request.args.get('search_permission', None)
-        search_description = request.args.get('search_description', None)
+        sort_by = data.get('sort_by', 'rolename')
+        reverse = data.get('reverse', False)
+        search_rolename = data.get('search_rolename', None)
+        search_permission = data.get('search_permission', None)
+        search_description = data.get('search_description', None)
         role_list = RoleManager.search(
             page, page_size, sort_by, reverse, search_rolename, search_permission, search_description)
         role_list = [role.as_dict() for role in role_list]

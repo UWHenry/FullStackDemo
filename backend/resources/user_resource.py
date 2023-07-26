@@ -106,17 +106,18 @@ class UserSearchResource(Resource):
     @api_ns.marshal_list_with(user_search_output_model, code=200)
     @jwt_required()
     def post(self):
-        page = int(request.args.get('page', 1))
-        page_size = int(request.args.get('page_size', 10))
+        data = request.get_json()
+        page = data.get('page', 1)
+        page_size = data.get('page_size', 10)
         if page < 1:
             page = 1
         if page_size < 1:
             page_size = 10
 
-        sort_by = request.args.get('sort_by', 'username')
-        reverse = request.args.get('reverse', False)
-        search_username = request.args.get('search_username', None)
-        search_address = request.args.get('search_address', None)
+        sort_by = data.get('sort_by', 'username')
+        reverse = data.get('reverse', False)
+        search_username = data.get('search_username', None)
+        search_address = data.get('search_address', None)
         user_list = UserManager.search(
             page, page_size, sort_by, reverse, search_username, search_address)
         user_list = [user.as_dict() for user in user_list]
