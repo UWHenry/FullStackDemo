@@ -86,3 +86,7 @@ class RoleManager:
     @staticmethod
     def list() -> List[Role]:
         return Role.query.all()
+    
+    @staticmethod
+    def count() -> int:
+        return Role.query.count()

@@ -96,3 +96,7 @@ class UserManager:
     @staticmethod
     def list() -> List[User]:
         return User.query.all()
+    
+    @staticmethod
+    def count() -> int:
+        return User.query.count()
