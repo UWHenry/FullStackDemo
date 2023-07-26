@@ -31,12 +31,10 @@ class UserManager:
             )
             db.session.add(new_user)
 
-            if db.session.is_active:
-                db.session.commit()
+            db.session.commit()
             return new_user
         except:
-            if db.session.is_active:
-                db.session.rollback()
+            db.session.rollback()
         return None
 
     @staticmethod
@@ -63,15 +61,11 @@ class UserManager:
                     user.roles = UserManager._get_role_list(roles)
                 user.version_id += 1
 
-                if db.session.is_active:
-                    db.session.commit()
+                db.session.commit()
                 return user
-        except Exception as e:
-            print("update", e, flush=True)
-            if db.session.is_active:
-                db.session.rollback()
-        if db.session.is_active:
-            db.session.commit()
+        except:
+            db.session.rollback()
+        db.session.commit()
         return None
 
     @staticmethod
@@ -84,12 +78,10 @@ class UserManager:
             if user:
                 db.session.delete(user)
 
-            if db.session.is_active:
-                db.session.commit()
+            db.session.commit()
             return True
         except:
-            if db.session.is_active:
-                db.session.rollback()
+            db.session.rollback()
         return False
         
     @staticmethod

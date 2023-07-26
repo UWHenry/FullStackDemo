@@ -1,11 +1,21 @@
 from models import db
 from models.role import Role
+from models.user import User
 from typing import List
 
 
 class RoleManager:
     @staticmethod
-    def create(rolename: str, permission: str, description: str) -> Role | None:
+    def _get_user_list(users: List[str]):
+        user_list = []
+        for username in users:
+            user = User.query.get(username)
+            if user and user not in user_list:
+                user_list.append(user)
+        return user_list
+    
+    @staticmethod
+    def create(rolename: str, permission: str, description: str, users: List[str]) -> Role | None:
         try:
             if not db.session.is_active:
                 db.session.begin()
@@ -13,16 +23,15 @@ class RoleManager:
             new_role = Role(
                 rolename=rolename,
                 permission=permission,
-                description=description
+                description=description,
+                users=RoleManager._get_user_list(users)
             )
             db.session.add(new_role)
 
-            if db.session.is_active:
-                db.session.commit()
+            db.session.commit()
             return new_role
         except:
-            if db.session.is_active:
-                db.session.rollback()
+            db.session.rollback()
         return None
 
     @staticmethod
@@ -31,7 +40,7 @@ class RoleManager:
         return role
 
     @staticmethod
-    def update(rolename: str, version_id: int, permission: str | None, description: str | None) -> Role | None:
+    def update(rolename: str, version_id: int, permission: str | None, description: str | None, users: List[str] | None) -> Role | None:
         try:
             if not db.session.is_active:
                 db.session.begin()
@@ -45,16 +54,15 @@ class RoleManager:
                     role.permission = permission
                 if description is not None:
                     role.description = description
+                if users is not None:
+                    role.users = RoleManager._get_user_list(users)
                 role.version_id += 1
 
-                if db.session.is_active:
-                    db.session.commit()
+                db.session.commit()
                 return role
         except:
-            if db.session.is_active:
-                db.session.rollback()
-        if db.session.is_active:
-            db.session.commit()
+            db.session.rollback()
+        db.session.commit()
         return None
 
     @staticmethod
@@ -66,12 +74,10 @@ class RoleManager:
             if role:
                 db.session.delete(role)
 
-            if db.session.is_active:
-                db.session.commit()
+            db.session.commit()
             return True
         except:
-            if db.session.is_active:
-                db.session.rollback()
+            db.session.rollback()
         return False
 
     @staticmethod
