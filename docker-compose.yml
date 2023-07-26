@@ -22,6 +22,7 @@ services:
         environment:
             DATABASE_URL: postgresql://my_user:my_password@postgres:5432/my_db
             SECRET_KEY: uFTuxjpGQxU8EsfcVPcTJfzqwG1CrjWk
+            JWT_SECRET_KEY: wq2d6379Xb7U3dwPkb2Wy2NcpZesc6N1
         networks:
             - my_network
 
