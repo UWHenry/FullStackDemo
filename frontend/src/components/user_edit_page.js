@@ -91,7 +91,7 @@ function UserEditPage() {
                                 onChange={handleChange} required disabled={!newUser}/>
                         </Form.Group>
 
-                        <Form.Group controlId="username" className="mt-3">
+                        <Form.Group controlId="password" className="mt-3">
                             <Form.Label>Password</Form.Label>
                             <Form.Control type="text" placeholder="Enter your password" name="password" value={formData.password} 
                                 onChange={handleChange} required disabled={!newUser}/>

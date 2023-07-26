@@ -4,7 +4,7 @@ import { Container, Row, Col, Table, FormControl, Pagination, Button } from 'rea
 import axiosInstance from '../utils/axiosInstance';
 
 
-function UserListPage({ isLoggedIn }) {
+function RoleListPage({ isLoggedIn }) {
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -13,7 +13,7 @@ function UserListPage({ isLoggedIn }) {
         }
     }, [isLoggedIn, navigate]);
 
-    const [users, setUsers] = useState([]);
+    const [roles, setRoles] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
@@ -21,24 +21,24 @@ function UserListPage({ isLoggedIn }) {
     const [sortReverse, setSortReverse] = useState(false)
     const pageSize = 10;
 
-    const fetchUsers = async () => {
+    const fetchRoles = async () => {
         try {
-            const response = await axiosInstance.post(`/api/users/search`, {
+            const response = await axiosInstance.post(`/api/roles/search`, {
                 "page": currentPage,
                 "page_size": pageSize,
                 "sort_by": sortBy,
                 "reverse": sortReverse,
-                "search_username": searchTerm
+                "search_rolename": searchTerm
             });
-            setUsers(response.data.users ?? []);
+            setRoles(response.data.roles ?? []);
             setTotalPages(response.data.total_pages);
         } catch (error) {
-            console.error('Error fetching users:', error);
+            console.error('Error fetching roles:', error);
         }
     };
     useEffect(() => {
         if (isLoggedIn) {
-            fetchUsers();
+            fetchRoles();
         }
     }, [currentPage, searchTerm, sortBy, sortReverse]);
 
@@ -59,52 +59,54 @@ function UserListPage({ isLoggedIn }) {
         setCurrentPage(1);
     };
 
-    const handleDelete = async (username) => {
+    const handleDelete = async (rolename) => {
         try {
-            const response = await axiosInstance.delete(`/api/user/${username}`);
+            const response = await axiosInstance.delete(`/api/role/${rolename}`);
             if (response.data.message === "Success") {
-                fetchUsers();
+                fetchRoles();
             }
         } catch (error) {
-            console.error('Error fetching users:', error);
+            console.error('Error fetching roles:', error);
         }
     };
 
-    const handleUpdate = async (user) => {
-        navigate('/user/edit', { state: { user, isLoggedIn } });
+    const handleUpdate = async (role) => {
+        navigate('/role/edit', { state: { role, isLoggedIn } });
     };
     return (
         <Container>
             <Row className="justify-content-center mt-5">
                 <Col xs={12} md={12}>
-                    <h1 style={{ textAlign: 'center' }}>Users</h1>
+                    <h1 style={{ textAlign: 'center' }}>Roles</h1>
                     <Button variant="primary" type="button" className="mt-3" onClick={() => handleUpdate({})}>
-                        Create User
+                        Create Role
                     </Button>
-                    <FormControl type="text" value={searchTerm} onChange={handleSearch} placeholder="Search users" />
+                    <FormControl type="text" value={searchTerm} onChange={handleSearch} placeholder="Search roles" />
 
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th onClick={() => handleSort('username')}>Username</th>
-                                <th onClick={() => handleSort('address')}>Address</th>
-                                <th onClick={() => handleSort('roles')}>Roles</th>
+                                <th onClick={() => handleSort('rolename')}>Rolename</th>
+                                <th onClick={() => handleSort('permission')}>Permission</th>
+                                <th onClick={() => handleSort('description')}>Description</th>
+                                <th onClick={() => handleSort('users')}>Users</th>
                                 <th>Update</th>
                                 <th>Delete</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            {users.map((user) => (
-                                <tr key={user.username}>
-                                    <td>{user.username}</td>
-                                    <td>{user.address}</td>
-                                    <td>{user.roles.map(role => role.rolename).join(', ')}</td>
+                            {roles.map((role) => (
+                                <tr key={role.rolename}>
+                                    <td>{role.rolename}</td>
+                                    <td>{role.permission}</td>
+                                    <td>{role.description}</td>
+                                    <td>{role.users.map(user => user.username).join(', ')}</td>
                                     <td>
-                                        <Button variant="primary" onClick={() => handleUpdate(user)}>Update</Button>
+                                        <Button variant="primary" onClick={() => handleUpdate(role)}>Update</Button>
                                     </td>
                                     <td>
-                                        <Button variant="danger" onClick={() => handleDelete(user.username)}>Delete</Button>
+                                        <Button variant="danger" onClick={() => handleDelete(role.rolename)}>Delete</Button>
                                     </td>
                                 </tr>
                             ))}
@@ -129,4 +131,4 @@ function UserListPage({ isLoggedIn }) {
         </Container>
     );
 }
-export default UserListPage;
+export default RoleListPage;
