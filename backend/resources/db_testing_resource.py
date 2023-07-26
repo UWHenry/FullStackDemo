@@ -5,6 +5,7 @@ from typing import Tuple
 
 from flask_restx import Resource
 from flask import Flask
+from flask_jwt_extended import jwt_required
 
 from db_utils.role_manager import RoleManager
 from db_utils.user_manager import UserManager
@@ -24,7 +25,7 @@ def test_optimistic_lock(rolename: str, index: int, version_id: int, sleep_time:
     db.init_app(app)
     with app.app_context():
         time.sleep(sleep_time)
-        role = RoleManager.update(rolename, version_id, None, f"new description: {index}")
+        role = RoleManager.update(rolename, version_id, None, f"new description: {index}", None)
         result = "Success" if role else "Fail"
         return {
             "proccess_index": index,
@@ -34,9 +35,10 @@ def test_optimistic_lock(rolename: str, index: int, version_id: int, sleep_time:
 @db_testing_ns.route('/test_optimistic_lock')
 class OptimisticLockTest(Resource):
     @db_testing_ns.marshal_list_with(test_result)
+    @jwt_required()
     def get(self):
         rolename = "optimistic_lock_test"
-        RoleManager.create(rolename, "testing", "testing optimistic lock with 10 processes")
+        RoleManager.create(rolename, "testing", "testing optimistic lock with 10 processes", [])
         role = RoleManager.read(rolename)
         
         testing_inputs = [(rolename, index, role.version_id, 0 if index == 0 else 1) for index in range(10)]
