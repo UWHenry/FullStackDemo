@@ -51,10 +51,11 @@ class RoleUpdateResource(Resource):
         data = request.get_json()
         rolename = data.get("rolename", None)
         permission = data.get("permission", None)
-        description = data.get("description", None)
+        description = data.get("description", "")
+        users = data.get("users", [])
         if not rolename or not permission:
             return {"message": "Invalid json body"}, 400
-        new_role = RoleManager.create(rolename, permission, description)
+        new_role = RoleManager.create(rolename, permission, description, users)
         if new_role:
             return {"message": "Success"}, 200
         return {"message": "Role already Exists"}, 409
@@ -70,6 +71,7 @@ class RoleUpdateResource(Resource):
         rolename = data.get("rolename", None)
         permission = data.get("permission", None)
         description = data.get("description", None)
+        users = data.get("users", None)
         if not rolename:
             return {"message": "Invalid rolename"}, 400
         if permission == "":
@@ -78,7 +80,7 @@ class RoleUpdateResource(Resource):
         role = RoleManager.read(rolename)
         if role is None:
             return {"message": "Role not found"}, 404
-        updated_role = RoleManager.update(rolename, role.version_id, permission, description)
+        updated_role = RoleManager.update(rolename, role.version_id, permission, description, users)
         if updated_role:
             return {"message": "Success"}, 200
         return {"message": "Fail"}, 500
@@ -106,10 +108,10 @@ class RoleSearchResource(Resource):
         role_list = RoleManager.search(
             page, page_size, sort_by, reverse, search_rolename, search_permission, search_description)
         role_list = [role.as_dict() for role in role_list]
-        
+
         total_items = RoleManager.count()
         total_pages = (total_items + page_size - 1) // page_size
-        return {"users": role_list, "total_pages": total_pages}, 200
+        return {"roles": role_list, "total_pages": total_pages}, 200
 
 # List Roles
 @api_ns.route('/roles')

@@ -73,7 +73,8 @@ role_model = api_ns.model('Role', {
 role_input_model = api_ns.model('RoleInput', {
     'rolename': fields.String,
     'permission': fields.String,
-    'description': fields.String
+    'description': fields.String,
+    'users': fields.List(fields.String, description="usernames")
 })
 role_search_input_model = api_ns.model('RoleSearchInput', {
     "page": fields.Integer(required=True),
