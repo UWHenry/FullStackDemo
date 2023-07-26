@@ -17,19 +17,17 @@ from models import db
 
 
 app = Flask(__name__)
-api = Api(app, version='1.0', title='My API', doc='/api/swagger.json')
+api = Api(app, version='1.0', title='My API')
 api.add_namespace(db_testing_ns)
 api.add_namespace(csfr_ns)
 api.add_namespace(role_ns)
 api.add_namespace(user_ns)
 
-# app.config['SECRET_KEY'] = 'uFTuxjpGQxU8EsfcVPcTJfzqwG1CrjWk'
-# app.config['JWT_SECRET_KEY'] = 'wq2d6379Xb7U3dwPkb2Wy2NcpZesc6N1'
-# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://my_user:my_password@localhost:5432/my_db"
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
 app.config["JWT_TOKEN_LOCATION"] = ["headers"]
 app.config["JWT_COOKIE_SECURE"] = True
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600 # access token lifespan in seconds
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app) 
@@ -37,7 +35,7 @@ with app.app_context():
     db.create_all()
 
 
-CORS(app, origins=["http://localhost:3000"])
+CORS(app, origins=["http://localhost:3000", "https://localhost:8443"])
 # csrf = CSRFProtect(app)
 jwt = JWTManager(app)
 argon2.init_app(app)
@@ -45,31 +43,31 @@ socketio = SocketIO(app)
 
 
 # web sockets
-last_client_message_time = {} 
-@socketio.on('connect')
-def handle_connect():
-    last_client_message_time[request.sid] = time.time()
+# last_client_message_time = {} 
+# @socketio.on('connect')
+# def handle_connect():
+#     last_client_message_time[request.sid] = time.time()
 
-@socketio.on('disconnect')
-def handle_disconnect():
-    last_client_message_time.pop(request.sid)
+# @socketio.on('disconnect')
+# def handle_disconnect():
+#     last_client_message_time.pop(request.sid)
 
-@socketio.on('message_from_frontend')
-def handle_message_from_frontend(message):
-    last_client_message_time[request.sid] = time.time()
+# @socketio.on('message_from_frontend')
+# def handle_message_from_frontend(message):
+#     last_client_message_time[request.sid] = time.time()
 
-def send_alive_message():
-    while True:
-        socketio.sleep(60)
-        emit('message_from_backend', 'is still alive?')
+# def send_alive_message():
+#     while True:
+#         socketio.sleep(60)
+#         emit('message_from_backend', 'is still alive?')
         
-def check_client_activity():
-    while True:
-        socketio.sleep(60)
-        current_time = time.time()
-        for client_id, last_message_time in last_client_message_time.items():
-            if current_time - last_message_time > 180:
-                socketio.disconnect(client_id)
+# def check_client_activity():
+#     while True:
+#         socketio.sleep(60)
+#         current_time = time.time()
+#         for client_id, last_message_time in last_client_message_time.items():
+#             if current_time - last_message_time > 180:
+#                 socketio.disconnect(client_id)
 
 # socketio.start_background_task(send_alive_message)
 # socketio.start_background_task(check_client_activity)
