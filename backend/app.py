@@ -24,8 +24,12 @@ api.add_namespace(role_ns)
 api.add_namespace(user_ns)
 
 # app.config['SECRET_KEY'] = 'uFTuxjpGQxU8EsfcVPcTJfzqwG1CrjWk'
+# app.config['JWT_SECRET_KEY'] = 'wq2d6379Xb7U3dwPkb2Wy2NcpZesc6N1'
 # app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://my_user:my_password@localhost:5432/my_db"
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
+app.config["JWT_TOKEN_LOCATION"] = ["headers"]
+app.config["JWT_COOKIE_SECURE"] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app) 
@@ -34,7 +38,7 @@ with app.app_context():
 
 
 CORS(app, origins=["http://localhost:3000"])
-csrf = CSRFProtect(app)
+# csrf = CSRFProtect(app)
 jwt = JWTManager(app)
 argon2.init_app(app)
 socketio = SocketIO(app)
