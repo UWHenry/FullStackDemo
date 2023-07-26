@@ -5,43 +5,40 @@ from flask import Flask, request
 from flask_restx import Api
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
-
-from resources.user_resource import ns as user_ns
-from resources.role_resource import ns as role_ns
-from resources.csrf_resource import ns as csrf_ns
-from resources.db_testing_resource import db_testing_ns
-
 from flask_jwt_extended import JWTManager
 from flask_wtf.csrf import CSRFProtect
 
+from resources.db_testing_resource import db_testing_ns
+from resources.csrf_resource import api_ns as csfr_ns
+from resources.role_resource import api_ns as role_ns
+from resources.user_resource import api_ns as user_ns
+from db_utils.user_manager import argon2
 from models import db
-from db_utils import argon2
 
 
 app = Flask(__name__)
 api = Api(app, version='1.0', title='My API', doc='/api/swagger.json')
+api.add_namespace(db_testing_ns)
+api.add_namespace(csfr_ns)
+api.add_namespace(role_ns)
+api.add_namespace(user_ns)
 
 # app.config['SECRET_KEY'] = 'uFTuxjpGQxU8EsfcVPcTJfzqwG1CrjWk'
+# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://my_user:my_password@localhost:5432/my_db"
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-CORS(app, origins=["http://localhost:3000"], supports_credentials=True, expose_headers=["X-CSRFToken"])
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db.init_app(app) 
+with app.app_context():
+    db.create_all()
+
+
+CORS(app, origins=["http://localhost:3000"])
 csrf = CSRFProtect(app)
 jwt = JWTManager(app)
 argon2.init_app(app)
 socketio = SocketIO(app)
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
-# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://my_user:my_password@localhost:5432/my_db"
-
-db.init_app(app) 
-with app.app_context():
-    db.create_all()
-
-api.add_namespace(user_ns)
-api.add_namespace(role_ns)
-api.add_namespace(csrf_ns)
-api.add_namespace(db_testing_ns)
- 
 
 # web sockets
 last_client_message_time = {} 
@@ -74,4 +71,4 @@ def check_client_activity():
 # socketio.start_background_task(check_client_activity)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app, port=8000, debug=True)

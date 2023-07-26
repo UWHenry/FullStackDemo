@@ -4,7 +4,7 @@ api_ns = Namespace('api')
 db_testing_ns = Namespace("db_testing")
 
 # testing models
-optimistic_lock_result = db_testing_ns.model('OptimisticLockResult', {
+test_result = db_testing_ns.model('TestResult', {
     'proccess_index': fields.Integer,
     'update_result': fields.String
 })
