@@ -8,7 +8,7 @@ function CsrfProvider({ children }) {
 
     useEffect(() => {
         // Fetch the CSRF token from the backend
-        axios.get('http://localhost:8000/api/get_csrf_token')
+        axios.get('https://localhost:8000/api/get_csrf_token')
             .then(response => {
                 setCsrfToken(response.data.csrf_token);
             })

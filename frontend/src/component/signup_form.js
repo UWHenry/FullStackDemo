@@ -2,6 +2,7 @@ import { Form, Button } from 'react-bootstrap';
 import axios from 'axios';
 import { useState, useContext } from 'react';
 import { CsrfContext } from './csrf_provider';
+import getCsrfToken from '../utils/csrfToken';
 
 
 function SignupForm(property) {
@@ -10,21 +11,25 @@ function SignupForm(property) {
         username: '',
         password: '',
         address: '',
+        csrf_token: csrfToken
     });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // const headers = {
-            //     'Content-Type': 'application/json',
-            //     'X-CSRFToken': csrfToken
-            // };
+            console.log(csrfToken)
+            const headers = {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': csrfToken
+            };
             // console.log(headers)
-            axios.post('http://localhost:8000/api/signup', formData, { withCredentials: true })
+            axios.post('https://localhost:8000/api/signup', formData, { headers: headers, credentials: 'include', mode: 'cors'})
                 .then((response) => {
                     // Handle the response data
                     console.log(response.data);
@@ -43,6 +48,7 @@ function SignupForm(property) {
 
     return (
         <Form onSubmit={handleSubmit}>
+            <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
             <Form.Group controlId="username" className="mt-3">
                 <Form.Label>Username</Form.Label>
                 <Form.Control type="text" placeholder="Enter your username" name="username"
