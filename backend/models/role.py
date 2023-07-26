@@ -20,7 +20,7 @@ class Role(db.Model):
             "description": self.description,
             "users": [
                 {
-                    "username": user.name,
+                    "username": user.username,
                     "address": user.address
                 }
                 for user in self.users
