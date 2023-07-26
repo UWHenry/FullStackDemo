@@ -50,9 +50,13 @@ user_search_input_model = api_ns.model('UserSearchInput', {
     "page": fields.Integer(required=True),
     "page_size": fields.Integer(required=True),
     "sort_by": fields.String,
-    "reverse": fields.String,
+    "reverse": fields.Boolean,
     "search_username": fields.String,
     "search_address": fields.String
+})
+user_search_output_model = api_ns.model('UserSearchOutput', {
+    "users": fields.List(fields.Nested(user_model)),
+    "total_pages": fields.Integer
 })
 
 # role related models
@@ -75,8 +79,12 @@ role_search_input_model = api_ns.model('RoleSearchInput', {
     "page": fields.Integer(required=True),
     "page_size": fields.Integer(required=True),
     "sort_by": fields.String,
-    "reverse": fields.String,
+    "reverse": fields.Boolean,
     "search_rolename": fields.String,
     "search_permission": fields.String,
     "search_description": fields.String
+})
+role_search_output_model = api_ns.model('RoleSearchOutput', {
+    "roles": fields.List(fields.Nested(role_model)),
+    "total_pages": fields.Integer
 })

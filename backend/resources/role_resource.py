@@ -2,7 +2,14 @@ from db_utils.role_manager import RoleManager
 from flask import request
 from flask_restx import Resource
 from flask_jwt_extended import jwt_required
-from .namespace_models import api_ns, message_output_model, role_model, role_input_model, role_search_input_model
+from .namespace_models import (
+    api_ns, 
+    message_output_model, 
+    role_model, 
+    role_input_model, 
+    role_search_input_model, 
+    role_search_output_model
+)
 
 
 # Role Read and Delete
@@ -82,9 +89,9 @@ class RoleUpdateResource(Resource):
 @api_ns.route('/roles/search')
 class RoleSearchResource(Resource):
     @api_ns.expect(role_search_input_model)
-    @api_ns.marshal_list_with(role_model, code=200)
+    @api_ns.marshal_with(role_search_output_model, code=200)
     @jwt_required()
-    def get(self):
+    def post(self):
         page = int(request.args.get('page', 1))
         page_size = int(request.args.get('page_size', 10))
         if page < 1:
@@ -93,14 +100,17 @@ class RoleSearchResource(Resource):
             page_size = 10
 
         sort_by = request.args.get('sort_by', 'rolename')
-        reverse = request.args.get('reverse', "false") == "true"
+        reverse = request.args.get('reverse', False)
         search_rolename = request.args.get('search_rolename', None)
         search_permission = request.args.get('search_permission', None)
         search_description = request.args.get('search_description', None)
         role_list = RoleManager.search(
             page, page_size, sort_by, reverse, search_rolename, search_permission, search_description)
         role_list = [role.as_dict() for role in role_list]
-        return role_list, 200
+        
+        total_items = RoleManager.count()
+        total_pages = (total_items + page_size - 1) // page_size
+        return {"users": role_list, "total_pages": total_pages}, 200
 
 # List Roles
 @api_ns.route('/roles')

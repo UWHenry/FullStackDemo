@@ -10,6 +10,7 @@ from .namespace_models import (
     user_login_input_model,
     user_update_input_model,
     user_search_input_model,
+    user_search_output_model,
     user_model
 )
 
@@ -51,13 +52,12 @@ class Login(Resource):
         return {"message": "Invalid credentials"}, 401
 
 # User Read, Update, Delete
-@api_ns.route('/user')
+@api_ns.route('/user/<string:username>')
 class UserResource(Resource):
     @api_ns.response(model=user_model, code=200, description="User model")
     @api_ns.response(model=message_output_model, code=404, description="User not found")
     @jwt_required()
-    def get(self):
-        username = get_jwt_identity()
+    def get(self, username: str):
         result_user = UserManager.read(username)
         if result_user:
             return result_user.as_dict(), 200
@@ -69,9 +69,8 @@ class UserResource(Resource):
     @api_ns.marshal_with(message_output_model, code=404, description="User not found")
     @api_ns.marshal_with(message_output_model, code=500, description="Fail")
     @jwt_required()
-    def put(self):
+    def put(self, username: str):
         data = request.get_json()
-        username = get_jwt_identity()
         password = data.get("password", None)
         address = data.get("address", None)
         roles = data.get("roles", None)
@@ -91,8 +90,7 @@ class UserResource(Resource):
     @api_ns.marshal_with(message_output_model, code=404, description="User not found")
     @api_ns.marshal_with(message_output_model, code=500, description="Fail")
     @jwt_required()
-    def delete(self):
-        username = get_jwt_identity()
+    def delete(self, username: str):
         user = UserManager.read(username)
         if user is None:
             return {"message": "User not found"}, 404
@@ -105,7 +103,7 @@ class UserResource(Resource):
 @api_ns.route('/users/search')
 class UserSearchResource(Resource):
     @api_ns.expect(user_search_input_model)
-    @api_ns.marshal_list_with(user_model, code=200)
+    @api_ns.marshal_list_with(user_search_output_model, code=200)
     @jwt_required()
     def post(self):
         page = int(request.args.get('page', 1))
@@ -116,13 +114,16 @@ class UserSearchResource(Resource):
             page_size = 10
 
         sort_by = request.args.get('sort_by', 'username')
-        reverse = request.args.get('reverse', "") == "true"
+        reverse = request.args.get('reverse', False)
         search_username = request.args.get('search_username', None)
         search_address = request.args.get('search_address', None)
         user_list = UserManager.search(
             page, page_size, sort_by, reverse, search_username, search_address)
         user_list = [user.as_dict() for user in user_list]
-        return user_list, 200
+        
+        total_items = UserManager.count()
+        total_pages = (total_items + page_size - 1) // page_size
+        return {"users": user_list, "total_pages": total_pages}, 200
 
 # List Users
 @api_ns.route('/users')
