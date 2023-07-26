@@ -14,6 +14,7 @@ class RoleManager:
                     description=description
                 )
                 db.session.add(new_role)
+                db.session.commit()
                 return new_role
         except:
             db.session.rollback()
@@ -38,6 +39,7 @@ class RoleManager:
                     if description is not None:
                         role.description = description
                     role.version_id += 1
+                    db.session.commit()
                     return role
         except:
             db.session.rollback()
@@ -50,6 +52,7 @@ class RoleManager:
                 role = Role.query.get(rolename)
                 if role:
                     db.session.delete(role)
+                    db.session.commit()
                     return True
         except:
             db.session.rollback()

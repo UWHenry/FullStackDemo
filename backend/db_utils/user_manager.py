@@ -28,6 +28,7 @@ class UserManager:
                     roles=UserManager._get_role_list(roles)
                 )
                 db.session.add(new_user)
+                db.session.commit()
                 return new_user
         except:
             db.session.rollback()
@@ -54,8 +55,10 @@ class UserManager:
                     if roles is not None:
                         user.roles = UserManager._get_role_list(roles)
                     user.version_id += 1
+                    db.session.commit()
                     return user
-        except:
+        except Exception as e:
+            print("update", e, flush=True)
             db.session.rollback()
         return None
 
@@ -66,6 +69,7 @@ class UserManager:
                 user = User.query.get(username)
                 if user:
                     db.session.delete(user)
+                db.session.commit()
                 return True
         except:
             db.session.rollback()
