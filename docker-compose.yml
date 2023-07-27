@@ -4,8 +4,6 @@ services:
         build:
             context: ./frontend  
         restart: on-failure:3
-        ports:
-            - "3000:3000"
         networks:
             - my_network
 
@@ -16,7 +14,7 @@ services:
         ports:
             - "8000:8000"
         volumes:
-            - ./backend:/app
+            - ./backend/certificates:/app/certificates
         depends_on:
             - postgres
         environment:
