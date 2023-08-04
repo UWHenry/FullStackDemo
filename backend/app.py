@@ -1,5 +1,6 @@
 import os
 import time
+import secrets
 
 from flask import Flask, request
 from flask_restx import Api
@@ -23,8 +24,8 @@ api.add_namespace(csfr_ns)
 api.add_namespace(role_ns)
 api.add_namespace(user_ns)
 
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
+app.config['SECRET_KEY'] = secrets.token_hex(32)
+app.config['JWT_SECRET_KEY'] = secrets.token_hex(32)
 app.config["JWT_TOKEN_LOCATION"] = ["headers"]
 app.config["JWT_COOKIE_SECURE"] = True
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600 # access token lifespan in seconds
