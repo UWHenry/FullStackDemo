@@ -35,8 +35,8 @@ with app.app_context():
     db.create_all()
 
 
-CORS(app, origins=["http://localhost:3000", "https://localhost:8443"])
-# csrf = CSRFProtect(app)
+CORS(app, origins=["http://localhost:3000", "https://localhost:8443"], supports_credentials=True)
+csrf = CSRFProtect(app)
 jwt = JWTManager(app)
 argon2.init_app(app)
 socketio = SocketIO(app)
