@@ -24,6 +24,7 @@ api.add_namespace(csfr_ns)
 api.add_namespace(role_ns)
 api.add_namespace(user_ns)
 
+# Generate a 32-byte (256-bit) random key
 app.config['SECRET_KEY'] = secrets.token_hex(32)
 app.config['JWT_SECRET_KEY'] = secrets.token_hex(32)
 app.config["JWT_TOKEN_LOCATION"] = ["headers"]
