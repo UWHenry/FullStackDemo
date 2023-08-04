@@ -28,6 +28,7 @@ app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
 app.config["JWT_TOKEN_LOCATION"] = ["headers"]
 app.config["JWT_COOKIE_SECURE"] = True
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600 # access token lifespan in seconds
+app.config['WTF_CSRF_SSL_STRICT'] = False # avoids CSRF same origin policy check
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app) 
@@ -35,7 +36,7 @@ with app.app_context():
     db.create_all()
 
 
-CORS(app, origins=["http://localhost:3000", "https://localhost:8443"], supports_credentials=True)
+CORS(app, origins=["https://localhost:3000", "https://localhost:8443"], supports_credentials=True)
 csrf = CSRFProtect(app)
 jwt = JWTManager(app)
 argon2.init_app(app)
