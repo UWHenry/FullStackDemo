@@ -16,8 +16,8 @@ axiosInstance.interceptors.request.use(
         if (['post', 'put', 'patch', 'delete'].includes(config.method.toLowerCase()) && !config.headers['X-CSRFToken']) {
             try {
                 const response = await axios.get(
-                    `${axiosInstance.defaults.baseURL}/api/get_csrf_token`, 
-                    {withCredentials: true}
+                    `${axiosInstance.defaults.baseURL}/api/get_csrf_token`,
+                    { withCredentials: true }
                 );
                 config.headers['X-CSRFToken'] = response.data.csrf_token;
             } catch (error) {
