@@ -10,7 +10,7 @@ import UserListPage from './pages/user_list_page';
 import UserEditPage from './pages/user_edit_page';
 import RoleListPage from './pages/role_list_page';
 import RoleEditPage from './pages/role_edit_page';
-import OptimisticLockTestingPage from './optimistic_lock_testing_page';
+import OptimisticLockTestingPage from './pages/optimistic_lock_testing_page';
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
