@@ -6,10 +6,9 @@ import axiosInstance from '../../utils/axiosInstance';
 
 function RoleListPage({ isLoggedIn }) {
     const navigate = useNavigate();
-
     useEffect(() => {
         if (!isLoggedIn) {
-            navigate('/login');
+            navigate('/login', { replace: true });
         }
     }, [isLoggedIn, navigate]);
 
@@ -74,6 +73,8 @@ function RoleListPage({ isLoggedIn }) {
         navigate('/role/edit', { state: { role, isLoggedIn } });
     };
     return (
+        !isLoggedIn ?
+        null :
         <Row className="justify-content-center mt-5">
             <Col xs={12} md={12}>
                 <h1 style={{ textAlign: 'center' }}>Roles</h1>

@@ -27,6 +27,8 @@ function OptimisticLockTestingPage({ isLoggedIn }) {
     }, [isLoggedIn, navigate]);
 
     return (
+        !isLoggedIn ?
+        null :
         <Row className="justify-content-center mt-5">
             <Col xs={12} md={6}>
                 <h1>Optimistic Lock Testing</h1>

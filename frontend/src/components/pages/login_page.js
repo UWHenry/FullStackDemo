@@ -22,7 +22,6 @@ function LoginPage({ setIsLoggedIn }) {
         try {
             axiosInstance.post('/api/login', formData)
                 .then((response) => {
-                    sessionStorage.setItem("jwtToken", response.data.access_token);
                     setIsLoggedIn(true);
                     navigate('/');
                 })

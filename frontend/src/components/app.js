@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 
@@ -14,11 +14,6 @@ import OptimisticLockTestingPage from './pages/optimistic_lock_testing_page';
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-    useEffect(() => {
-        const jwtToken = sessionStorage.getItem('jwtToken');
-        setIsLoggedIn(!!jwtToken);
-    }, []);
 
     return (
         <Router>

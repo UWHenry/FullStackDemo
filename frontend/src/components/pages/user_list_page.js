@@ -74,6 +74,8 @@ function UserListPage({ isLoggedIn }) {
         navigate('/user/edit', { state: { user, isLoggedIn } });
     };
     return (
+        !isLoggedIn ?
+        null :
         <Row className="justify-content-center mt-5">
             <Col xs={12} md={12}>
                 <h1 style={{ textAlign: 'center' }}>Users</h1>
