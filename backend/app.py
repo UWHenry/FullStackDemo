@@ -17,7 +17,6 @@ from flask_jwt_extended import (
 
 from resources.authentication_resource import api_ns as auth_ns
 from resources.db_testing_resource import db_testing_ns
-from resources.csrf_resource import api_ns as csfr_ns
 from resources.role_resource import api_ns as role_ns
 from resources.user_resource import api_ns as user_ns
 from db_utils.user_manager import argon2
@@ -28,7 +27,6 @@ app = Flask(__name__)
 api = Api(app, version='1.0', title='My API')
 api.add_namespace(auth_ns)
 api.add_namespace(db_testing_ns)
-api.add_namespace(csfr_ns)
 api.add_namespace(role_ns)
 api.add_namespace(user_ns)
 

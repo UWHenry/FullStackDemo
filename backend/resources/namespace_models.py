@@ -16,9 +16,6 @@ message_output_model = api_ns.model('MessageOutput', {
 access_token_model = api_ns.model('AccessToken', {
     'access_token': fields.String(required=True)
 })
-csrf_token_model = api_ns.model('CSRFToken', {
-    'csrf_token': fields.String(required=True)
-})
 
 # user related models
 user_role_model = api_ns.model("UserRole", {
