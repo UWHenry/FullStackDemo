@@ -1,13 +1,16 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance';
 import { Row, Col } from 'react-bootstrap';
+import axiosInstance from '../../utils/axiosInstance';
+import { useSocket } from '../WebSocketProvider';
 
 function LogoutPage({ setIsLoggedIn }) {
     const navigate = useNavigate();
+    const { disconnectSocket } = useSocket();
     useEffect(() => {
         axiosInstance.post('/api/logout')
             .then(() => {
+                disconnectSocket();
                 setIsLoggedIn(false);
                 setTimeout(() => {
                     navigate('/login');

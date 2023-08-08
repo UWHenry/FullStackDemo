@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Row, Col, Form, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
+import { useSocket } from '../WebSocketProvider';
 
 function LoginPage({ setIsLoggedIn }) {
     const navigate = useNavigate();
+    const { getSocket } = useSocket();
     const [errorMessage, setErrorMessage] = useState("");
     const [formData, setFormData] = useState({
         username: '',
@@ -22,6 +24,8 @@ function LoginPage({ setIsLoggedIn }) {
         try {
             axiosInstance.post('/api/login', formData)
                 .then((response) => {
+                    // initialize backend health socket
+                    getSocket();
                     setIsLoggedIn(true);
                     navigate('/');
                 })
