@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 
-import NavigationMenu from './navigation_menu';
-import SignupPage from './pages/signup_page';
-import LoginPage from './pages/login_page';
-import LogoutPage from './pages/logout_page';
-import UserListPage from './pages/user_list_page';
-import UserEditPage from './pages/user_edit_page';
-import RoleListPage from './pages/role_list_page';
-import RoleEditPage from './pages/role_edit_page';
-import OptimisticLockTestingPage from './pages/optimistic_lock_testing_page';
+import NavigationMenu from './NavigationMenu';
+import SignupPage from './pages/SignupPage';
+import LoginPage from './pages/LoginPage';
+import LogoutPage from './pages/LogoutPage';
+import UserListPage from './pages/UserListPage';
+import UserEditPage from './pages/UserEditPage';
+import RoleListPage from './pages/RoleListPage';
+import RoleEditPage from './pages/RoleEditPage';
+import OptimisticLockTestingPage from './pages/OptimisticLockTestingPage';
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);

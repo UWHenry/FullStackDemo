@@ -6,7 +6,6 @@ import axiosInstance from '../../utils/axiosInstance';
 
 function UserListPage({ isLoggedIn }) {
     const navigate = useNavigate();
-
     useEffect(() => {
         if (!isLoggedIn) {
             navigate('/login');
