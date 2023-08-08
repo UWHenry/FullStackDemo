@@ -12,4 +12,4 @@ EXPOSE 8000
 
 USER myuser
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--certfile", "certificates/certificate.crt", "--keyfile", "certificates/private.key", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--certfile", "certificates/certificate.crt", "--keyfile", "certificates/private.key", "--worker-class", "geventwebsocket.gunicorn.workers.GeventWebSocketWorker", "app:app"]
