@@ -1,6 +1,8 @@
 import os
+import sys
 import threading
 import secrets
+import signal
 from datetime import datetime, timedelta, timezone
 
 from flask import Flask
@@ -15,7 +17,6 @@ from flask_jwt_extended import (
 )
 
 from resources.authentication_resource import api_ns as auth_ns
-from resources.db_testing_resource import api_ns as db_testing_ns
 from resources.role_resource import api_ns as role_ns
 from resources.user_resource import api_ns as user_ns
 from db_utils.user_manager import argon2
@@ -23,10 +24,10 @@ from models import db
 from client_alive_socket import socketio, check_client_activity, send_alive_message
 
 
-# local environment setup: uncomment following lines and add async_mode='threading' to socketio.init_app
-# production environment: remember to uncomment following lines and remove async_mode in socketio.init_app
+# local environment: uncomment following lines
+# docker environment: commment following lines
 # os.environ['DATABASE_URL'] = "postgresql://my_user:my_password@localhost:5432/my_db"
-# os.environ['CORS_ORIGINS'] = "https://localhost:3000,https://localhost:8443"
+# os.environ['CORS_ORIGINS'] = "http://localhost:3000,https://localhost:8443"
 
 # print postgres queries
 # import logging
@@ -37,7 +38,6 @@ from client_alive_socket import socketio, check_client_activity, send_alive_mess
 app = Flask(__name__)
 api = Api(app, version='1.0', title='My API', validate=True)
 api.add_namespace(auth_ns)
-api.add_namespace(db_testing_ns)
 api.add_namespace(role_ns)
 api.add_namespace(user_ns)
 
@@ -78,8 +78,12 @@ def refresh_expiring_jwts(response):
         return response
 
 if __name__ == '__main__':
-    ssl_certificate = (
-        "backend/certificates/certificate.crt",
-        "backend/certificates/private.key"
-    )
-    socketio.run(app, port=8000, ssl_context=ssl_certificate, debug=True)
+    # register wrapup
+    def shutdown_server(signal, frame):
+        socketio.stop()
+        sys.exit(0)
+    signal.signal(signal.SIGINT, shutdown_server)
+    signal.signal(signal.SIGTERM, shutdown_server)
+
+    # Run the Flask app with SocketIO, which is production ready
+    socketio.run(app, host='0.0.0.0', port=8000)
