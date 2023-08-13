@@ -11,7 +11,6 @@ import UserListPage from './pages/UserListPage';
 import UserEditPage from './pages/UserEditPage';
 import RoleListPage from './pages/RoleListPage';
 import RoleEditPage from './pages/RoleEditPage';
-import OptimisticLockTestingPage from './pages/OptimisticLockTestingPage';
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -27,7 +26,6 @@ function App() {
                         <Route path="/user/edit" element={<UserEditPage />} />
                         <Route path="/role" element={<RoleListPage isLoggedIn={isLoggedIn} />} />
                         <Route path="/role/edit" element={<RoleEditPage />} />
-                        <Route path="/optimistic_lock_test" element={<OptimisticLockTestingPage isLoggedIn={isLoggedIn} />} />
                         <Route path="/signup" element={<SignupPage setIsLoggedIn={setIsLoggedIn} />} />
                         <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} />} />
                         <Route path="/logout" element={<LogoutPage setIsLoggedIn={setIsLoggedIn} />} />
