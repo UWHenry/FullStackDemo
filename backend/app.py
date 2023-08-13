@@ -77,6 +77,15 @@ def refresh_expiring_jwts(response):
     except (RuntimeError, KeyError):
         return response
 
+from flask import request
+@app.before_request
+def before_request():
+    # Log the incoming request method and URL
+    print(f"Received {request.method} request at {request.url}", flush=True)
+    print(f"{request.headers}", flush=True)
+    print(f"{request.endpoint}", flush=True)
+
+
 if __name__ == '__main__':
     # register wrapup
     def shutdown_server(signal, frame):
