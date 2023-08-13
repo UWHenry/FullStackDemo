@@ -15,7 +15,7 @@ from flask_jwt_extended import (
 )
 
 from resources.authentication_resource import api_ns as auth_ns
-from resources.db_testing_resource import db_testing_ns
+from resources.db_testing_resource import api_ns as db_testing_ns
 from resources.role_resource import api_ns as role_ns
 from resources.user_resource import api_ns as user_ns
 from db_utils.user_manager import argon2
@@ -23,8 +23,19 @@ from models import db
 from client_alive_socket import socketio, check_client_activity, send_alive_message
 
 
+# local environment setup: uncomment following lines and add async_mode='threading' to socketio.init_app
+# production environment: remember to uncomment following lines and remove async_mode in socketio.init_app
+# os.environ['DATABASE_URL'] = "postgresql://my_user:my_password@localhost:5432/my_db"
+# os.environ['CORS_ORIGINS'] = "https://localhost:3000,https://localhost:8443"
+
+# print postgres queries
+# import logging
+# logging.basicConfig()
+# logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
+
 app = Flask(__name__)
-api = Api(app, version='1.0', title='My API')
+api = Api(app, version='1.0', title='My API', validate=True)
 api.add_namespace(auth_ns)
 api.add_namespace(db_testing_ns)
 api.add_namespace(role_ns)
@@ -44,10 +55,11 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-CORS(app, origins=["https://localhost:3000", "https://localhost:8443"], supports_credentials=True)
+CORS_ORIGINS = os.environ.get('CORS_ORIGINS').split(',')
+CORS(app, origins=CORS_ORIGINS, supports_credentials=True)
 jwt = JWTManager(app)
 argon2.init_app(app)
-socketio.init_app(app, cors_allowed_origins=["https://localhost:3000", "https://localhost:8443"])
+socketio.init_app(app, cors_allowed_origins=CORS_ORIGINS)
 threading.Thread(target=send_alive_message, daemon=True).start()
 threading.Thread(target=check_client_activity, daemon=True).start()
 
@@ -64,7 +76,6 @@ def refresh_expiring_jwts(response):
         return response
     except (RuntimeError, KeyError):
         return response
-
 
 if __name__ == '__main__':
     ssl_certificate = (
