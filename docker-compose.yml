@@ -4,6 +4,10 @@ services:
         build:
             context: ./frontend  
         restart: on-failure:3
+        environment:
+            REACT_APP_API_URL: https://backend:8000/
+        ports:
+            - "3000:3000"
         networks:
             - my_network
 
@@ -19,8 +23,7 @@ services:
             - postgres
         environment:
             DATABASE_URL: postgresql://my_user:my_password@postgres:5432/my_db
-            SECRET_KEY: uFTuxjpGQxU8EsfcVPcTJfzqwG1CrjWk
-            JWT_SECRET_KEY: wq2d6379Xb7U3dwPkb2Wy2NcpZesc6N1
+            CORS_ORIGINS: https://frontend:3000,https://localhost:8443
         networks:
             - my_network
 
@@ -31,6 +34,8 @@ services:
             POSTGRES_DB: my_db
             POSTGRES_USER: my_user
             POSTGRES_PASSWORD: my_password
+        # ports:
+        #     - "5432:5432"
         networks:
             - my_network
     
