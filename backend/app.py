@@ -27,7 +27,7 @@ from client_alive_socket import socketio, check_client_activity, send_alive_mess
 # local environment: uncomment following lines
 # docker environment: commment following lines
 # os.environ['DATABASE_URL'] = "postgresql://my_user:my_password@localhost:5432/my_db"
-# os.environ['CORS_ORIGINS'] = "http://localhost:3000,https://localhost:8443"
+# os.environ['CORS_ORIGINS'] = "http://localhost:3000"
 
 # print postgres queries
 # import logging
