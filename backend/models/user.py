@@ -3,11 +3,14 @@ from .user_roles import user_roles
 
 class User(db.Model):
     __tablename__ = "users"
+    
     username = db.Column(db.String, primary_key=True, index=True)
     password = db.Column(db.String, nullable=False)
     address = db.Column(db.String, nullable=False)
     roles = db.relationship('Role', secondary=user_roles, back_populates='users')
     version_id = db.Column(db.Integer, nullable=False, default=0)
+    
+    __mapper_args__ = {"version_id_col": version_id}
 
     def get_id(self):
         return str(self.username)

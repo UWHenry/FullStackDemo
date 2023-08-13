@@ -1,91 +1,57 @@
+from math import ceil
+from typing import Tuple
 from models import db
 from models.user import User
 from models.role import Role
 from flask_argon2 import Argon2
-from typing import List
+
 
 argon2 = Argon2()
 
 class UserManager:
     @staticmethod
-    def _get_role_list(roles: List[str]):
-        role_list = []
-        for rolename in roles:
-            role = Role.query.get(rolename)
-            if role and role not in role_list:
-                role_list.append(role)
-        return role_list
+    def _get_role_list(roles: list[str]) -> list[Role]:
+        return Role.query.filter(Role.rolename.in_(roles)).all()
 
     @staticmethod
-    def create(username: str, password: str, address: str, roles: List[str]) -> User | None:
-        try:
-            if not db.session.is_active:
-                db.session.begin()
-
-            password_hash = argon2.generate_password_hash(password)
-            new_user = User(
-                username=username,
-                password=password_hash,
-                address=address,
-                roles=UserManager._get_role_list(roles)
-            )
-            db.session.add(new_user)
-
-            db.session.commit()
-            return new_user
-        except:
-            db.session.rollback()
-        return None
+    def create(username: str, password: str, address: str, roles: list[str]):
+        password_hash = argon2.generate_password_hash(password)
+        new_user = User(
+            username=username,
+            password=password_hash,
+            address=address,
+            roles=UserManager._get_role_list(roles)
+        )
+        db.session.add(new_user)
 
     @staticmethod
     def read(username: str) -> User | None:
-        user = User.query.get(username)
-        return user
+        return User.query.get(username)
 
     @staticmethod
-    def update(username: str, version_id: int, password: str | None, address: str | None, roles: List[str] | None) -> User | None:
-        try:
-            if not db.session.is_active:
-                db.session.begin()
-
-            user = User.query.get(username)
-            if user:
-                if version_id < user.version_id:
-                    raise Exception("Optimistic Lock Triggered: About Transaction!")
-                if password:
-                    password_hash = argon2.generate_password_hash(password)
-                    user.password = password_hash
-                if address is not None:
-                    user.address = address
-                if roles is not None:
-                    user.roles = UserManager._get_role_list(roles)
-                user.version_id += 1
-
-                db.session.commit()
-                return user
-        except:
-            db.session.rollback()
-        db.session.commit()
-        return None
+    def update(user: User, password: str | None, address: str | None, roles: list[str] | None):
+        if password:
+            password_hash = argon2.generate_password_hash(password)
+            user.password = password_hash
+        if address is not None:
+            user.address = address
+        if roles is not None:
+            user.roles = UserManager._get_role_list(roles)
+        user.version_id += 1
 
     @staticmethod
-    def delete(username: str) -> bool:
-        try:
-            if not db.session.is_active:
-                db.session.begin()
-
-            user = User.query.get(username)
-            if user:
-                db.session.delete(user)
-
-            db.session.commit()
-            return True
-        except:
-            db.session.rollback()
-        return False
+    def delete(user: User):
+        db.session.delete(user)
         
     @staticmethod
-    def search(page: int = 1, page_size: int = 10, order_by: str = "username", reverse: bool = False, search_username: str | None = None, search_address: str | None = None) -> List[User]:
+    def search(
+        page: int = 1, 
+        page_size: int = 10, 
+        order_by: str = "username", 
+        reverse: bool = False, 
+        search_username: str | None = None, 
+        search_address: str | None = None
+    ) -> Tuple[list[User], int]:
         query = User.query
         if search_username:
             query = query.filter(User.username.ilike(f'%{search_username}%'))
@@ -98,15 +64,14 @@ class UserManager:
         if reverse:
             order = order.desc()
         query = query.order_by(order)
+        
+        total_users = query.count()
+        total_pages = ceil(total_users / page_size)
 
         start_idx = (page - 1) * page_size
         users_page = query.offset(start_idx).limit(page_size).all()
-        return users_page
+        return users_page, total_pages
 
     @staticmethod
-    def list() -> List[User]:
+    def list() -> list[User]:
         return User.query.all()
-    
-    @staticmethod
-    def count() -> int:
-        return User.query.count()
