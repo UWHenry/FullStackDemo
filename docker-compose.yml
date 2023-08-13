@@ -4,10 +4,8 @@ services:
         build:
             context: ./frontend  
         restart: on-failure:3
-        environment:
-            REACT_APP_API_URL: https://backend:8000/
-        ports:
-            - "3000:3000"
+        depends_on:
+            - backend
         networks:
             - my_network
 
@@ -15,15 +13,11 @@ services:
         build: 
             context: ./backend
         restart: on-failure:3
-        ports:
-            - "8000:8000"
-        volumes:
-            - ./backend/certificates:/app/certificates
         depends_on:
             - postgres
         environment:
             DATABASE_URL: postgresql://my_user:my_password@postgres:5432/my_db
-            CORS_ORIGINS: https://frontend:3000,https://localhost:8443
+            CORS_ORIGINS: http://localhost:3000,https://localhost:8443,http://localhost:8443
         networks:
             - my_network
 
@@ -34,8 +28,6 @@ services:
             POSTGRES_DB: my_db
             POSTGRES_USER: my_user
             POSTGRES_PASSWORD: my_password
-        # ports:
-        #     - "5432:5432"
         networks:
             - my_network
     
