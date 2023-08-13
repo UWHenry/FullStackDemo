@@ -16,7 +16,7 @@ function RoleListPage({ isLoggedIn }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
-    const [sortBy, setSortBy] = useState(null);
+    const [sortBy, setSortBy] = useState('rolename');
     const [sortReverse, setSortReverse] = useState(false)
     const pageSize = 10;
 
@@ -60,12 +60,10 @@ function RoleListPage({ isLoggedIn }) {
 
     const handleDelete = async (rolename) => {
         try {
-            const response = await axiosInstance.delete(`/api/role/${rolename}`);
-            if (response.data.message === "Success") {
-                fetchRoles();
-            }
+            await axiosInstance.delete(`/api/role/${rolename}`);
+            fetchRoles();
         } catch (error) {
-            console.error('Error fetching roles:', error);
+            console.error('Error deleting roles:', error);
         }
     };
 

@@ -24,17 +24,13 @@ function UserEditPage() {
         if (!isLoggedIn) {
             navigate("/login");
         } else {
-            try {
-                axiosInstance.get(`/api/roles`)
-                    .then((response) => {
-                        setRoles(response.data);
-                    })
-                    .catch((error) => {
-                        console.error("Roles fetch failed:", error);
-                    });
-            } catch (error) {
-                console.error("Error fetching users:", error);
-            }
+            axiosInstance.get(`/api/roles`)
+                .then((response) => {
+                    setRoles(response.data);
+                })
+                .catch((error) => {
+                    console.error("Roles fetch failed:", error);
+                });
         }
     }, [isLoggedIn, navigate]);
 
@@ -61,19 +57,18 @@ function UserEditPage() {
             'Content-Type': 'application/json',
         };
         try {
-            const endpoint = newUser ? "/api/signup" : `/api/user/${formData.username}`;
+            const endpoint = newUser ? "/api/user" : `/api/user/${formData.username}`;
             const method = newUser ? "post" : "put";
             const { address, roles } = formData;
             const payload = newUser ? formData : { address, roles };
             await axiosInstance[method](endpoint, payload, { headers });
+            navigate("/user");
         } catch (error) {
-            let errMessage = error.response.data?.message;
+            let errMessage = error.response.data;
             if (errMessage) {
                 setErrorMessage(errMessage);
             }
-            console.error(`${newUser ? "Create" : "Update"} User failed:`, error);
         }
-        navigate("/user");
     };
     const handleCancel = (e) => {
         navigate("/user");

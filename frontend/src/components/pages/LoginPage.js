@@ -22,22 +22,15 @@ function LoginPage({ setIsLoggedIn }) {
         e.preventDefault();
         setErrorMessage("")
         try {
-            axiosInstance.post('/api/login', formData)
-                .then((response) => {
-                    // initialize backend health socket
-                    getSocket();
-                    setIsLoggedIn(true);
-                    navigate('/');
-                })
-                .catch((error) => {
-                    let errMessage = error.response.data?.message;
-                    if (errMessage) {
-                        setErrorMessage(errMessage)
-                    }
-                    console.error('POST request failed:', error);
-                });
+            await axiosInstance.post('/api/login', formData);
+            getSocket();
+            setIsLoggedIn(true);
+            navigate('/');
         } catch (error) {
-            console.error('Error submitting form:', error);
+            let errMessage = error.response.data;
+            if (errMessage) {
+                setErrorMessage(errMessage)
+            }
         }
     };
 

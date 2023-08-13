@@ -1,8 +1,25 @@
 import axios from "axios";
+import axiosRetry from "axios-retry";
+
 const axiosInstance = axios.create({
     baseURL: process.env.REACT_APP_API_URL,
     withCredentials: true
 });
+axiosRetry(axiosInstance, {
+    retries: 3,
+    retryDelay: (retryCount) => {
+        return retryCount * 1000;
+    },
+    retryCondition: (error) => {
+        const isOptimisticLockConflict = (
+            error.response &&
+            error.response.status === 409 &&
+            error.response.data === "Optimistic Lock Conflict"
+        );
+        return isOptimisticLockConflict;
+    }
+});
+
 function getCookie(name) {
     let value = `; ${document.cookie}`;
     let parts = value.split(`; ${name}=`);

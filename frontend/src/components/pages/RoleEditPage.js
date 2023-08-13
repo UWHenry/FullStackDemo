@@ -24,17 +24,13 @@ function RoleEditPage() {
         if (!isLoggedIn) {
             navigate("/login");
         } else {
-            try {
-                axiosInstance.get(`/api/users`)
-                    .then((response) => {
-                        setUsers(response.data);
-                    })
-                    .catch((error) => {
-                        console.error("Users fetch failed:", error);
-                    });
-            } catch (error) {
-                console.error("Error fetching roles:", error);
-            }
+            axiosInstance.get(`/api/users`)
+                .then((response) => {
+                    setUsers(response.data);
+                })
+                .catch((error) => {
+                    console.error("Users fetch failed:", error);
+                });
         }
     }, [isLoggedIn, navigate]);
 
@@ -61,17 +57,18 @@ function RoleEditPage() {
             'Content-Type': 'application/json',
         };
         try {
-            const endpoint = "/api/role";
+            const endpoint = newRole ? "/api/role" : `/api/role/${formData.rolename}`;
             const method = newRole ? "post" : "put";
-            await axiosInstance[method](endpoint, formData, { headers });
+            const { permission, description, users } = formData;
+            const payload = newRole ? formData : { permission, description, users };
+            await axiosInstance[method](endpoint, payload, { headers });
+            navigate("/role");
         } catch (error) {
-            let errMessage = error.response.data?.message;
+            let errMessage = error.response.data;
             if (errMessage) {
                 setErrorMessage(errMessage);
             }
-            console.error(`${newRole ? "Create" : "Update"} Role failed:`, error);
         }
-        navigate("/role");
     };
     const handleCancel = (e) => {
         navigate("/role");

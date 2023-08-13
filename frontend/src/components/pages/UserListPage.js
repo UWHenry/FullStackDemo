@@ -16,10 +16,9 @@ function UserListPage({ isLoggedIn }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
-    const [sortBy, setSortBy] = useState(null);
+    const [sortBy, setSortBy] = useState('username');
     const [sortReverse, setSortReverse] = useState(false)
     const pageSize = 10;
-
     const fetchUsers = async () => {
         try {
             const response = await axiosInstance.post(`/api/users/search`, {
@@ -60,12 +59,10 @@ function UserListPage({ isLoggedIn }) {
 
     const handleDelete = async (username) => {
         try {
-            const response = await axiosInstance.delete(`/api/user/${username}`);
-            if (response.data.message === "Success") {
-                fetchUsers();
-            }
+            await axiosInstance.delete(`/api/user/${username}`);
+            fetchUsers();
         } catch (error) {
-            console.error('Error fetching users:', error);
+            console.error('Error deleting user:', error);
         }
     };
 
