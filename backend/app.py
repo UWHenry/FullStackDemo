@@ -43,6 +43,7 @@ api.add_namespace(user_ns)
 
 # Generate a 32-byte (256-bit) random key
 app.config['SECRET_KEY'] = secrets.token_hex(32)
+app.config['PROPAGATE_EXCEPTIONS'] = True
 # manages json web token and csrf using cookies
 app.config['JWT_SECRET_KEY'] = secrets.token_hex(32)
 app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
@@ -77,13 +78,12 @@ def refresh_expiring_jwts(response):
     except (RuntimeError, KeyError):
         return response
 
-from flask import request
-@app.before_request
-def before_request():
-    # Log the incoming request method and URL
-    print(f"Received {request.method} request at {request.url}", flush=True)
-    print(f"{request.headers}", flush=True)
-    print(f"{request.endpoint}", flush=True)
+# view requests infomation
+# from flask import request
+# @app.before_request
+# def before_request():
+#     print(f"Received {request.method} request at {request.url}", flush=True)
+#     print(f"{request.headers}", flush=True)
 
 
 if __name__ == '__main__':
