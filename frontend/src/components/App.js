@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 
 import { SocketProvider } from './WebSocketProvider';
+import axiosInstance from '../utils/axiosInstance';
 import NavigationMenu from './NavigationMenu';
 import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
@@ -14,7 +15,24 @@ import RoleEditPage from './pages/RoleEditPage';
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [loading, setLoading] = useState(true);
 
+    useEffect(() => {
+        axiosInstance.get('/api/check-auth')
+            .then(response => {
+                setIsLoggedIn(true);
+            })
+            .catch(error => {
+                setIsLoggedIn(false);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }, []);
+
+    if (loading) {
+        return <p>Loading...</p>;
+    }
     return (
         <Router>
             <SocketProvider setIsLoggedIn={setIsLoggedIn}>
