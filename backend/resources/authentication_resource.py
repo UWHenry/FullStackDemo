@@ -1,6 +1,6 @@
 from flask import request, after_this_request
 from flask_restx import Resource
-from flask_jwt_extended import create_access_token, unset_jwt_cookies, set_access_cookies
+from flask_jwt_extended import create_access_token, unset_jwt_cookies, set_access_cookies, jwt_required
 from sqlalchemy.exc import IntegrityError
 from db_utils.user_manager import UserManager, argon2
 from .namespace_models import (
@@ -58,6 +58,15 @@ class Login(Resource):
                 return response
             return "Success", 200
         return "Invalid Credentials", 401
+    
+@api_ns.route('/check-auth')
+class CheckAuth(Resource):
+    @api_ns.response(200, "Authorized")
+    @api_ns.response(401, "Unauthorized")
+    @api_ns.doc(description='Check Authorization Status')
+    @jwt_required()
+    def get(self):
+        return "Authorized", 200
 
 @api_ns.route('/logout')
 class Logout(Resource):
