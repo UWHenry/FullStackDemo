@@ -27,14 +27,14 @@ Before you proceed, make sure you have the following installed on your machine:
 Once the services are up and running, you can access the application through a web browser.
 * Backend API: https://localhost:8443/api/
 * Swagger API documentation: https://localhost:8443/api/swagger
-* Frontend: https://localhost:8443 (served through Nginx)
+* Frontend: https://localhost:8443
 
 ## Technologies Used
 * Flask: Backend framework for building the API.
     * JWT authentication and CSRF protection are implemented using Flask-JWT-Extended.
     * All REST API endpoints except signup, login, and logout require jwt and csrf validation.
     * Heartbeat websocket is implemented using Flask-SocketIO.
-    * Flask-SQLAlchemy is used as the ORM, which automatically handles transactions with each request.
+    * Flask-SQLAlchemy is used as the ORM, which automatically wraps each request in a transaction.
     * Swagger is generated using Flask-RESTX.
 * React: Frontend library for building user interfaces.
     * Axios is used for communicating with the backend along with axios-retry for automatic request retries.
