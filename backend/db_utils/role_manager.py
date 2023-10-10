@@ -22,7 +22,7 @@ class RoleManager:
 
     @staticmethod
     def read(rolename: str) -> Role | None:
-        return Role.query.get(rolename)
+        return db.session.get(Role, rolename)
 
     @staticmethod
     def update(role: Role, permission: str | None, description: str | None, users: list[str] | None):

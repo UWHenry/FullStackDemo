@@ -26,7 +26,7 @@ class UserManager:
 
     @staticmethod
     def read(username: str) -> User | None:
-        return User.query.get(username)
+        return db.session.get(User, username)
 
     @staticmethod
     def update(user: User, password: str | None, address: str | None, roles: list[str] | None):
