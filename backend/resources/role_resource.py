@@ -20,6 +20,7 @@ from .namespace_models import (
 class RoleResource(Resource):
     @api_ns.param('rolename', 'The rolename of the role to read', type='string', required=True)
     @api_ns.response(200, "Role model", role_model)
+    @api_ns.response(401, "Unauthorized")
     @api_ns.response(404, "Role Not Found")
     @api_ns.doc(description='Get the role with the given rolename')
     @jwt_required()
@@ -33,6 +34,7 @@ class RoleResource(Resource):
     @api_ns.expect(role_update_input_model)
     @api_ns.response(200, 'Success')
     @api_ns.response(400, 'Bad Request')
+    @api_ns.response(401, "Unauthorized")
     @api_ns.response(404, 'Role Not Found')
     @api_ns.response(409, 'Optimistic Lock Conflict')
     @api_ns.response(500, 'Internal Server Error')
@@ -59,6 +61,7 @@ class RoleResource(Resource):
 
     @api_ns.param('rolename', 'The rolename of the role to delete', type='string', required=True)
     @api_ns.response(200, "Success")
+    @api_ns.response(401, "Unauthorized")
     @api_ns.response(404, "Role Not Found")
     @api_ns.response(409, 'Optimistic Lock Conflict')
     @api_ns.response(500, "Internal Server Error")
@@ -85,6 +88,7 @@ class RoleCreateResource(Resource):
     @api_ns.expect(role_create_input_model)
     @api_ns.response(200, 'Success')
     @api_ns.response(400, 'Bad Request')
+    @api_ns.response(401, "Unauthorized")
     @api_ns.response(409, 'Role Already Exists')
     @api_ns.response(500, 'Internal Server Error')
     @api_ns.doc(description='Create a new role')
@@ -110,6 +114,7 @@ class RoleCreateResource(Resource):
 @api_ns.route('/roles/search')
 class RoleSearchResource(Resource):
     @api_ns.expect(role_search_input_model)
+    @api_ns.response(401, "Unauthorized")
     @api_ns.marshal_with(role_search_output_model, code=200)
     @api_ns.doc(description='Search roles')
     @jwt_required()
@@ -131,6 +136,7 @@ class RoleSearchResource(Resource):
 # List Roles
 @api_ns.route('/roles')
 class RoleListResource(Resource):
+    @api_ns.response(401, "Unauthorized")
     @api_ns.marshal_list_with(role_model, code=200)
     @api_ns.doc(description='List all roles')
     @jwt_required()

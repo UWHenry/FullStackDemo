@@ -19,6 +19,7 @@ from .namespace_models import (
 class UserResource(Resource):
     @api_ns.param('username', 'The username of the user to read', type='string', required=True)
     @api_ns.response(200, "User model", user_model)
+    @api_ns.response(401, "Unauthorized")
     @api_ns.response(404, "User not found")
     @api_ns.doc(description='Get the user with the given username')
     @jwt_required()
@@ -32,6 +33,7 @@ class UserResource(Resource):
     @api_ns.expect(user_update_input_model)
     @api_ns.response(200, 'Success')
     @api_ns.response(400, 'Bad Request')
+    @api_ns.response(401, "Unauthorized")
     @api_ns.response(404, 'User Not Found')
     @api_ns.response(409, 'Optimistic Lock Conflict')
     @api_ns.response(500, 'Internal Server Error')
@@ -58,6 +60,7 @@ class UserResource(Resource):
 
     @api_ns.param('username', 'The username of the user to delete', type='string', required=True)
     @api_ns.response(200, "Success")
+    @api_ns.response(401, "Unauthorized")
     @api_ns.response(404, "User Not Found")
     @api_ns.response(409, 'Optimistic Lock Conflict')
     @api_ns.response(500, "Internal Server Error")
@@ -83,6 +86,7 @@ class UserCreateResource(Resource):
     @api_ns.expect(user_create_input_model)
     @api_ns.response(200, 'Success')
     @api_ns.response(400, 'Bad Request')
+    @api_ns.response(401, "Unauthorized")
     @api_ns.response(409, 'User Already Exists')
     @api_ns.response(500, 'Internal Server Error')
     @api_ns.doc(description='Create a new user')
@@ -114,6 +118,7 @@ def create_user(data):
 @api_ns.route('/users/search')
 class UserSearchResource(Resource):
     @api_ns.expect(user_search_input_model)
+    @api_ns.response(401, "Unauthorized")
     @api_ns.marshal_list_with(user_search_output_model, code=200)
     @api_ns.doc(description='Search users')
     @jwt_required()
@@ -134,6 +139,7 @@ class UserSearchResource(Resource):
 # List Users
 @api_ns.route('/users')
 class UserListResource(Resource):
+    @api_ns.response(401, "Unauthorized")
     @api_ns.marshal_list_with(user_model, code=200)
     @api_ns.doc(description='List all users')
     @jwt_required()
