@@ -10,6 +10,9 @@ sys.path.insert(0, parent_dir)
 os.environ['DATABASE_URL'] = "sqlite:///test.db"
 os.environ['CORS_ORIGINS'] = ""
 
+from client_alive_socket import SETTINGS
+SETTINGS["IS_ALIVE_FREQUENCY"] = 2
+SETTINGS["KEEP_ALIVE_TIME"] = 3
 
 import pytest
 from app import app, db
