@@ -7,8 +7,10 @@ from flask import request
 socketio = SocketIO()
 client_connections = {}
 client_connections_lock = threading.Lock()
-IS_ALIVE_FREQUENCY = 60
-KEEP_ALIVE_TIME = 180
+SETTINGS = {
+    "IS_ALIVE_FREQUENCY": 60,
+    "KEEP_ALIVE_TIME": 180
+}
 
 @socketio.on('connect')
 def handle_connect():
@@ -28,16 +30,16 @@ def handle_message(message):
 
 def send_alive_message():
     while True:
-        socketio.sleep(IS_ALIVE_FREQUENCY)
+        socketio.sleep(SETTINGS["IS_ALIVE_FREQUENCY"])
         socketio.emit('alive_message', 'is still alive?')
         
 def check_client_activity():
     while True:
-        socketio.sleep(IS_ALIVE_FREQUENCY)
+        socketio.sleep(SETTINGS["IS_ALIVE_FREQUENCY"])
         current_time = time.time()
         with client_connections_lock:
             for client_id, last_message_time in client_connections.items():
-                if current_time - last_message_time > KEEP_ALIVE_TIME:
+                if current_time - last_message_time > SETTINGS["KEEP_ALIVE_TIME"]:
                     socketio.emit('alive_message', data='Disconnecting due to inactivity!', to=client_id)
                     socketio.sleep(1)
                     socketio.emit('disconnect', to=client_id)
