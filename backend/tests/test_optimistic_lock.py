@@ -1,4 +1,4 @@
-from testing_env_setup import app, db
+from testing_env_setup import app, db, client
 from db_utils.user_manager import UserManager
 from db_utils.role_manager import RoleManager
 from sqlalchemy.orm.exc import StaleDataError
@@ -24,7 +24,7 @@ class TestOptimisticLock:
                 return "Optimistic Lock Conflict"
         return ""
         
-    def test_user_update_optimistic_lock(self):
+    def test_user_update_optimistic_lock(self, client):
         with app.app_context():
             UserManager.create("test_username", "test_password", "test_address", [])
             db.session.commit()
@@ -45,7 +45,7 @@ class TestOptimisticLock:
                 return "Optimistic Lock Conflict"
         return ""
 
-    def test_role_update_optimistic_lock(self):
+    def test_role_update_optimistic_lock(self, client):
         with app.app_context():
             RoleManager.create("test_rolename", "read", "read permission", [])
             db.session.commit()

@@ -1,4 +1,4 @@
-from testing_env_setup import app, db
+from testing_env_setup import app, db, client
 from db_utils.user_manager import UserManager
 from db_utils.role_manager import RoleManager
 
@@ -11,7 +11,7 @@ class TestManyToMany:
                 RoleManager.delete(role)
             db.session.commit()
 
-    def test_add(self):
+    def test_add(self, client):
         with app.app_context():
             UserManager.create("test_username", "test_password", "test_address", [])
             RoleManager.create("test_rolename", "read", "read permission", ["test_username"])

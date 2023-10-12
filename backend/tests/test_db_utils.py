@@ -1,4 +1,4 @@
-from testing_env_setup import app, db
+from testing_env_setup import app, db, client
 from db_utils.user_manager import UserManager
 from db_utils.role_manager import RoleManager
 from models.user import User
@@ -13,14 +13,14 @@ class TestUserManager:
                 db.session.delete(role)
             db.session.commit()
 
-    def test_create(self):
+    def test_create(self, client):
         with app.app_context():
             UserManager.create("test_username", "test_password", "test_address", [])
             db.session.commit()
             assert db.session.get(User, "test_username") is not None
         self._clean_up()
 
-    def test_read(self):
+    def test_read(self, client):
         with app.app_context():
             new_user = User(
                 username="test_username",
@@ -34,7 +34,7 @@ class TestUserManager:
             assert user.username == "test_username"
         self._clean_up()
     
-    def test_update(self):
+    def test_update(self, client):
         with app.app_context():
             new_user = User(
                 username="test_username",
@@ -50,7 +50,7 @@ class TestUserManager:
             assert user.address == "test_address2"
         self._clean_up()
     
-    def test_search(self):
+    def test_search(self, client):
         with app.app_context():
             for i in range(9):
                 new_user = User(
@@ -66,7 +66,7 @@ class TestUserManager:
             assert users[0].username == "test_username5"
         self._clean_up()
     
-    def test_list(self):
+    def test_list(self, client):
         with app.app_context():
             for i in range(9):
                 new_user = User(
@@ -82,7 +82,7 @@ class TestUserManager:
             assert users[-1].username == "test_username8"
         self._clean_up()
 
-    def test_delete(self):
+    def test_delete(self, client):
         with app.app_context():
             new_user = User(
                 username="test_username",
@@ -106,14 +106,14 @@ class TestRoleManager:
                 db.session.delete(role)
             db.session.commit()
 
-    def test_create(self):
+    def test_create(self, client):
         with app.app_context():
             RoleManager.create("test_rolename", "read", "have permission to read files", [])
             db.session.commit()
             assert db.session.get(Role, "test_rolename") is not None
         self._clean_up()
 
-    def test_read(self):
+    def test_read(self, client):
         with app.app_context():
             new_role = Role(
                 rolename="test_rolename",
@@ -127,7 +127,7 @@ class TestRoleManager:
             assert role.rolename == "test_rolename"
         self._clean_up()
     
-    def test_update(self):
+    def test_update(self, client):
         with app.app_context():
             new_role = Role(
                 rolename="test_rolename",
@@ -143,7 +143,7 @@ class TestRoleManager:
             assert role.description == "have read permission"
         self._clean_up()
     
-    def test_search(self):
+    def test_search(self, client):
         with app.app_context():
             for i in range(9):
                 new_role = Role(
@@ -159,7 +159,7 @@ class TestRoleManager:
             assert roles[0].rolename == "test_rolename5"
         self._clean_up()
     
-    def test_list(self):
+    def test_list(self, client):
         with app.app_context():
             for i in range(9):
                 new_role = Role(
@@ -175,7 +175,7 @@ class TestRoleManager:
             assert roles[-1].rolename == "test_rolename8"
         self._clean_up()
 
-    def test_delete(self):
+    def test_delete(self, client):
         with app.app_context():
             new_role = Role(
                 rolename="test_rolename",
