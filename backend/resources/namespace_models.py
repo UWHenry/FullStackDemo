@@ -65,7 +65,7 @@ role_create_input_model = api_ns.model('RoleCreateInput', {
     'users': fields.List(fields.String, description="usernames")
 })
 role_update_input_model = api_ns.model('RoleUpdateInput', {
-    'permission': fields.String(required=True, min_length=1),
+    'permission': fields.String(min_length=1),
     'description': fields.String,
     'users': fields.List(fields.String, description="usernames")
 })
